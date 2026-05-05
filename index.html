@@ -2,1201 +2,706 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Review Work - Gallery</title>
-    <style>
-        * {<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WYRM.STUDIOS - Portfolio Gallery</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
+    <title>WYRM.STUDIO · Client Portfolio Vault</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0d0d0d 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, system-ui, sans-serif;
+            background: radial-gradient(circle at 10% 20%, #030303, #0a0a0a, #000000);
             min-height: 100vh;
-            overflow: hidden;
-            position: relative;
+            overflow-x: hidden;
+            color: #ffffff;
         }
 
-        .bg-shapes {
+        /* smooth scrolling & no layout jumps */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* glassmorphic background elements */
+        .ambient-glow {
             position: fixed;
             width: 100%;
             height: 100%;
-            overflow: hidden;
+            top: 0;
+            left: 0;
+            pointer-events: none;
             z-index: 0;
         }
-
-        .shape {
+        .orb {
             position: absolute;
-            filter: blur(80px);
-            opacity: 0.15;
-            animation: float 20s infinite;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-        }
-
-        .shape:nth-child(1) {
-            width: 500px;
-            height: 500px;
-            top: -150px;
-            left: -150px;
-        }
-
-        .shape:nth-child(2) {
-            width: 400px;
-            height: 400px;
-            bottom: -100px;
-            right: -100px;
-            animation-delay: -5s;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            33% { transform: translate(30px, -50px) scale(1.1); }
-            66% { transform: translate(-20px, 20px) scale(0.9); }
-        }
-
-        .container {
-            position: relative;
-            z-index: 1;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        /* Premium Header */
-        .header {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 20px;
-            padding: 25px 50px;
-            margin-bottom: 30px;
-            text-align: center;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
-        }
-
-        .brand-name {
-            color: #ffffff;
-            font-size: 2.2rem;
-            font-weight: 800;
-            letter-spacing: 4px;
-            margin-bottom: 8px;
-            text-transform: uppercase;
-        }
-
-        .header p {
-            color: rgba(255, 255, 255, 0.6);
-            font-size: 0.9rem;
-            letter-spacing: 2px;
-        }
-
-        /* Premium Gallery Container */
-        .gallery-wrapper {
-            position: relative;
-            width: 100%;
-            max-width: 750px;
-            height: 75vh;
-            background: rgba(255, 255, 255, 0.02);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 24px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-            overflow: hidden;
-        }
-
-        .gallery {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            transition: transform 0.5s cubic-bezier(0.4, 0.0, 0.2, 1);
-        }
-
-        .slide {
-            min-width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 15px;
-            user-select: none;
-        }
-
-        .image-container {
-            position: relative;
-            width: 95%;
-            height: 88%;
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-        }
-
-        .image-container img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            filter: grayscale(100%) contrast(1.05);
-            transition: transform 0.3s ease;
-        }
-
-        .image-number {
-            position: absolute;
-            top: 15px;
-            left: 15px;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(10px);
-            color: white;
-            padding: 8px 18px;
-            border-radius: 25px;
-            font-weight: 700;
-            font-size: 1rem;
-            letter-spacing: 2px;
-            z-index: 10;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .slide-info {
-            position: absolute;
-            bottom: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            text-align: center;
-            z-index: 5;
-        }
-
-        .slide-info h3 {
-            color: white;
-            font-size: 1rem;
-            font-weight: 600;
-            letter-spacing: 1px;
-            text-shadow: 0 2px 8px rgba(0,0,0,0.8);
-        }
-
-        .dots {
-            display: flex;
-            gap: 12px;
-            margin-top: 25px;
-            justify-content: center;
-        }
-
-        .dot {
-            width: 12px;
-            height: 12px;
+            width: 60vw;
+            height: 60vw;
+            background: radial-gradient(circle, rgba(80,70,150,0.2) 0%, rgba(0,0,0,0) 70%);
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.2);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: 2px solid transparent;
+            filter: blur(70px);
+            animation: drift 28s infinite alternate ease-in-out;
+        }
+        .orb:nth-child(1) { top: -15%; left: -20%; background: radial-gradient(circle, rgba(180,130,255,0.2), transparent 70%); }
+        .orb:nth-child(2) { bottom: -10%; right: -10%; width: 70vw; height: 70vw; animation-duration: 35s; background: radial-gradient(circle, rgba(255,90,160,0.12), transparent);}
+        @keyframes drift {
+            0% { transform: translate(0,0) scale(1); }
+            100% { transform: translate(6%, 8%) scale(1.2); }
         }
 
-        .dot.active {
-            background: white;
-            transform: scale(1.3);
-            box-shadow: 0 0 15px rgba(255,255,255,0.4);
-        }
-
-        .dot:hover {
-            background: rgba(255, 255, 255, 0.8);
-        }
-
-        /* Instagram Button - Premium */
-        .instagram-btn {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            background: linear-gradient(135deg, #ffffff 0%, #e0e0e0 100%);
-            color: #000000;
-            padding: 16px 28px;
-            border-radius: 30px;
-            text-decoration: none;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            box-shadow: 0 4px 20px rgba(255, 255, 255, 0.15);
-            transition: all 0.3s ease;
-            z-index: 100;
-            font-size: 0.95rem;
-            letter-spacing: 1px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .instagram-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 30px rgba(255, 255, 255, 0.25);
-        }
-
-        .instagram-btn svg {
-            width: 24px;
-            height: 24px;
-        }
-
-        .swipe-hint {
-            position: absolute;
-            bottom: 45px;
-            left: 50%;
-            transform: translateX(-50%);
-            color: rgba(255, 255, 255, 0.4);
-            font-size: 0.8rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            animation: swipe 2s infinite;
+        /* main container */
+        .main-container {
+            position: relative;
             z-index: 2;
-            letter-spacing: 1px;
-        }
-
-        @keyframes swipe {
-            0%, 100% { transform: translateX(-50%) translateX(0); }
-            50% { transform: translateX(-50%) translateX(-10px); }
-        }
-
-        .loading {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: white;
-            font-size: 1.2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1.2rem 1.5rem 1.8rem;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
+            justify-content: center;
+        }
+
+        /* header - premium minimal */
+        .brand-header {
+            text-align: center;
+            margin-bottom: 1.8rem;
+        }
+        .wyrm-title {
+            font-size: 2.6rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, #FFFFFF 0%, #c0b9ff 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .client-badge {
+            font-size: 0.85rem;
+            font-weight: 400;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            background: rgba(255,255,240,0.05);
+            display: inline-block;
+            padding: 0.4rem 1.2rem;
+            border-radius: 40px;
+            backdrop-filter: blur(5px);
+            margin-top: 8px;
+            color: #cccbc9;
+            border: 0.5px solid rgba(255,255,255,0.1);
+        }
+
+        /* gallery premium card */
+        .gallery-stage {
+            background: rgba(12, 12, 20, 0.55);
+            backdrop-filter: blur(16px);
+            border-radius: 2rem;
+            border: 1px solid rgba(255,255,255,0.08);
+            box-shadow: 0 25px 45px -12px rgba(0,0,0,0.6);
+            overflow: hidden;
+            position: relative;
+            transition: all 0.2s ease;
+        }
+
+        .viewport {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16 / 10;
+            overflow: hidden;
+            touch-action: pan-y pinch-zoom;
+        }
+
+        .gallery-track {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.45s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            will-change: transform;
+        }
+
+        .slide-card {
+            flex: 0 0 100%;
+            height: 100%;
+            display: flex;
             align-items: center;
-            gap: 15px;
+            justify-content: center;
+            padding: 1rem;
+            background: rgba(0,0,0,0.2);
         }
 
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 3px solid rgba(255, 255, 255, 0.1);
-            border-top-color: white;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
+        .frame {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background: #0a0a10;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.5);
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+        .frame img {
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            transition: transform 0.25s ease;
+            cursor: zoom-in;
+            display: block;
         }
 
-        .nav-arrow {
+        /* zoom mode */
+        .frame.zoomed img {
+            cursor: zoom-out;
+            transform: scale(1.8);
+        }
+
+        .img-counter {
+            position: absolute;
+            bottom: 1rem;
+            left: 1rem;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(12px);
+            padding: 0.35rem 1rem;
+            border-radius: 40px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            border: 0.5px solid rgba(255,255,255,0.2);
+            z-index: 8;
+            pointer-events: none;
+        }
+
+        /* navigation buttons — clean & touch friendly */
+        .nav-btn {
             position: absolute;
             top: 50%;
             transform: translateY(-50%);
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: white;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
+            background: rgba(20,20,30,0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.15);
+            width: 48px;
+            height: 48px;
+            border-radius: 60px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            transition: all 0.3s ease;
-            z-index: 10;
-            font-size: 1.5rem;
-        }
-
-        .nav-arrow:hover {
-            background: rgba(255, 255, 255, 0.15);
-            transform: translateY(-50%) scale(1.1);
-        }
-
-        .nav-arrow.prev { left: 10px; }
-        .nav-arrow.next { right: 10px; }
-
-        /* Credit Text - Left Side */
-        .credit-text {
-            position: fixed;
-            left: 25px;
-            bottom: 30px;
-            color: rgba(255, 255, 255, 0.3);
-            font-size: 0.75rem;
-            letter-spacing: 1px;
-            z-index: 100;
-            text-align: left;
-        }
-
-        .credit-text strong {
-            color: rgba(255, 255, 255, 0.6);
-            display: block;
-            margin-bottom: 4px;
-            font-size: 0.8rem;
-        }
-
-        .image-container.zoomed img {
-            object-fit: cover;
-            transform: scale(1.5);
-            cursor: zoom-out;
-        }
-
-        @media (max-width: 768px) {
-            .brand-name { font-size: 1.6rem; }
-            .header { padding: 20px 30px; margin-bottom: 20px; }
-            
-            .gallery-wrapper {
-                height: 70vh;
-                border-radius: 18px;
-                max-width: 100%;
-            }
-            
-            .image-container {
-                height: 90%;
-                border-radius: 12px;
-            }
-            
-            .instagram-btn {
-                bottom: 20px;
-                right: 20px;
-                padding: 12px 20px;
-                font-size: 0.85rem;
-            }
-            
-            .credit-text {
-                left: 15px;
-                bottom: 20px;
-                font-size: 0.65rem;
-            }
-            
-            .nav-arrow {
-                width: 42px;
-                height: 42px;
-                font-size: 1.3rem;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .container { padding: 10px; }
-            .header { margin-bottom: 15px; padding: 15px 20px; }
-            .gallery-wrapper { height: 65vh; }
-            .image-container { height: 92%; }
-            .brand-name { font-size: 1.4rem; letter-spacing: 3px; }
-        }
-
-        .error {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.2s;
+            z-index: 12;
             color: white;
-            padding: 20px;
-            border-radius: 15px;
-            text-align: center;
-            backdrop-filter: blur(10px);
+            font-size: 1.8rem;
+            font-weight: 300;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
         }
-    </style>
-</head>
-<body>
-    <div class="bg-shapes">
-        <div class="shape"></div>
-        <div class="shape"></div>
-    </div>
-
-    <div class="container">
-        <div class="header">
-            <div class="brand-name">WYRM.STUDIOS</div>
-            <p>Premium Design Portfolio</p>
-        </div>
-
-        <div class="gallery-wrapper" id="galleryWrapper">
-            <div class="loading" id="loading">
-                <div class="spinner"></div>
-                <span>Loading portfolio...</span>
-            </div>
-            <div class="gallery" id="gallery"></div>
-            
-            <button class="nav-arrow prev" onclick="changeSlide(-1)">‹</button>
-            <button class="nav-arrow next" onclick="changeSlide(1)">›</button>
-            
-            <div class="swipe-hint">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M5 12h14M12 5l7 7-7 7"/>
-                </svg>
-                Swipe or double-tap to zoom
-            </div>
-        </div>
-
-        <div class="dots" id="dots"></div>
-    </div>
-
-    <!-- Credit Text - Left Side -->
-    <div class="credit-text">
-        <strong>WYRM.STUDIOS</strong>
-        This website crafted by<br>
-        WYRM Studio © 2026
-    </div>
-
-    <!-- Instagram Button -->
-    <a href="https://www.instagram.com/wyrm.studios/" class="instagram-btn" target="_blank" id="instaBtn" style="display: none;">
-        <svg viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-        </svg>
-        Send Feedback
-    </a>
-
-    <script>
-        const config = {
-            githubUsername: 'wyrm-studios',
-            githubRepo: 'review.work',
-            folderPath: 'work',
-            instagramUsername: 'wyrm.studios',
-            fileExtensions: ['jpg', 'jpeg', 'png', 'gif', 'webp']
-        };
-
-        let images = [];
-        let currentIndex = 0;
-        let startX = 0;
-        let currentX = 0;
-        let isDragging = false;
-
-        async function init() {
-            try {
-                await loadImagesFromGitHub();
-                if (images.length > 0) {
-                    renderGallery();
-                    document.getElementById('loading').style.display = 'none';
-                    document.getElementById('instaBtn').style.display = 'flex';
-                    updateInstagramLink();
-                } else {
-                    showError('No images found in the repository');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                showError('Failed to load images. Check repo settings.');
-            }
+        .nav-btn:hover {
+            background: rgba(80,70,160,0.9);
+            transform: translateY(-50%) scale(1.02);
+            border-color: rgba(255,255,255,0.4);
+        }
+        .nav-prev { left: 16px; }
+        .nav-next { right: 16px; }
+        @media (max-width: 640px) {
+            .nav-btn { width: 40px; height: 40px; font-size: 1.5rem; }
+            .nav-prev { left: 8px; }
+            .nav-next { right: 8px; }
         }
 
-        async function loadImagesFromGitHub() {
-            const apiUrl = `https://api.github.com/repos/${config.githubUsername}/${config.githubRepo}/contents/${config.folderPath}`;
-            const response = await fetch(apiUrl);
-            if (!response.ok) throw new Error('Failed to fetch from GitHub');
-            const data = await response.json();
-            
-            images = data
-                .filter(file => {
-                    const ext = file.name.split('.').pop().toLowerCase();
-                    return config.fileExtensions.includes(ext);
-                })
-                .sort((a, b) => a.name.localeCompare(b.name, undefined, {numeric: true}));
-        }
-
-        function renderGallery() {
-            const gallery = document.getElementById('gallery');
-            const dotsContainer = document.getElementById('dots');
-            
-            gallery.innerHTML = '';
-            dotsContainer.innerHTML = '';
-            
-            images.forEach((image, index) => {
-                const slide = document.createElement('div');
-                slide.className = 'slide';
-                slide.innerHTML = `
-                    <div class="image-container" data-index="${index}">
-                        <span class="image-number">#${String(index + 1).padStart(2, '0')}</span>
-                        <img src="${image.download_url}" alt="${image.name}" loading="${index === 0 ? 'eager' : 'lazy'}">
-                    </div>
-                `;
-                gallery.appendChild(slide);
-                
-                const dot = document.createElement('div');
-                dot.className = `dot ${index === 0 ? 'active' : ''}`;
-                dot.onclick = () => goToSlide(index);
-                dotsContainer.appendChild(dot);
-            });
-            
-            updateGalleryPosition();
-            setupDoubleTapZoom();
-        }
-
-        function updateGalleryPosition() {
-            const gallery = document.getElementById('gallery');
-            gallery.style.transform = `translateX(-${currentIndex * 100}%)`;
-            
-            document.querySelectorAll('.dot').forEach((dot, index) => {
-                dot.classList.toggle('active', index === currentIndex);
-            });
-        }
-
-        function changeSlide(direction) {
-            currentIndex += direction;
-            if (currentIndex < 0) currentIndex = images.length - 1;
-            if (currentIndex >= images.length) currentIndex = 0;
-            updateGalleryPosition();
-            setTimeout(updateInstagramLink, 100);
-        }
-
-        function goToSlide(index) {
-            currentIndex = index;
-            updateGalleryPosition();
-            setTimeout(updateInstagramLink, 100);
-        }
-
-        function updateInstagramLink() {
-            const currentNumber = String(currentIndex + 1).padStart(2, '0');
-            const btn = document.getElementById('instaBtn');
-            const message = `Hi! I'm interested in design #${currentNumber}. Can we discuss?`;
-            btn.href = `https://www.instagram.com/wyrm.studios/?text=${encodeURIComponent(message)}`;
-        }
-
-        function showError(message) {
-            const loading = document.getElementById('loading');
-            loading.innerHTML = `<div class="error"><p>⚠️ ${message}</p></div>`;
-        }
-
-        function setupDoubleTapZoom() {
-            let lastTap = 0;
-            document.querySelectorAll('.image-container').forEach(container => {
-                container.addEventListener('click', (e) => {
-                    const currentTime = new Date().getTime();
-                    const tapLength = currentTime - lastTap;
-                    if (tapLength < 300 && tapLength > 0) {
-                        container.classList.toggle('zoomed');
-                        e.preventDefault();
-                    }
-                    lastTap = currentTime;
-                });
-            });
-        }
-
-        const galleryWrapper = document.getElementById('galleryWrapper');
-
-        galleryWrapper.addEventListener('touchstart', handleStart, {passive: false});
-        galleryWrapper.addEventListener('touchmove', handleMove, {passive: false});
-        galleryWrapper.addEventListener('touchend', handleEnd, false);
-        galleryWrapper.addEventListener('mousedown', handleStart, false);
-        galleryWrapper.addEventListener('mousemove', handleMove, false);
-        galleryWrapper.addEventListener('mouseup', handleEnd, false);
-        galleryWrapper.addEventListener('mouseleave', handleEnd, false);
-
-        function handleStart(e) {
-            if (e.target.closest('.image-container.zoomed')) return;
-            isDragging = true;
-            startX = e.type.includes('mouse') ? e.pageX : e.touches[0].pageX;
-            galleryWrapper.style.cursor = 'grabbing';
-        }
-
-        function handleMove(e) {
-            if (!isDragging) return;
-            e.preventDefault();
-            currentX = e.type.includes('mouse') ? e.pageX : e.touches[0].pageX;
-            const diff = currentX - startX;
-            const gallery = document.getElementById('gallery');
-            const offset = -(currentIndex * 100) + (diff / galleryWrapper.offsetWidth * 100);
-            gallery.style.transform = `translateX(${offset}%)`;
-        }
-
-        function handleEnd(e) {
-            if (!isDragging) return;
-            isDragging = false;
-            galleryWrapper.style.cursor = 'grab';
-            
-            const diff = currentX - startX;
-            const threshold = 50;
-            
-            if (Math.abs(diff) > threshold) {
-                if (diff > 0) changeSlide(-1);
-                else changeSlide(1);
-            } else {
-                updateGalleryPosition();
-            }
-        }
-
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowLeft') changeSlide(-1);
-            if (e.key === 'ArrowRight') changeSlide(1);
-        });
-
-        init();
-    </script>
-</body>
-</html>0%, #764ba2 100%);
-            min-height: 100vh;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .bg-shapes {
-            position: fixed;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            z-index: 0;
-        }
-
-        .shape {
-            position: absolute;
-            filter: blur(50px);
-            opacity: 0.5;
-            animation: float 20s infinite;
-        }
-
-        .shape:nth-child(1) {
-            width: 400px;
-            height: 400px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-            top: -100px;
-            left: -100px;
-        }
-
-        .shape:nth-child(2) {
-            width: 300px;
-            height: 300px;
-            background: rgba(255, 255, 255, 0.15);
-            border-radius: 50%;
-            bottom: -50px;
-            right: -50px;
-            animation-delay: -5s;
-        }
-
-        .shape:nth-child(3) {
-            width: 250px;
-            height: 250px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-            top: 50%;
-            left: 50%;
-            animation-delay: -10s;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            33% { transform: translate(30px, -50px) scale(1.1); }
-            66% { transform: translate(-20px, 20px) scale(0.9); }
-        }
-
-        .container {
-            position: relative;
-            z-index: 1;
-            height: 100vh;
+        /* dots indicator */
+        .dot-strip {
             display: flex;
-            flex-direction: column;
-            align-items: center;
             justify-content: center;
-            padding: 15px;
+            gap: 12px;
+            margin-top: 24px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            padding: 6px 12px;
         }
-
-        .header {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 16px;
-            padding: 15px 30px;
-            margin-bottom: 20px;
-            text-align: center;
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-        }
-
-        .header h1 {
-            color: white;
-            font-size: 1.6rem;
-            font-weight: 700;
-            margin-bottom: 3px;
-        }
-
-        .header p {
-            color: rgba(255, 255, 255, 0.9);
-            font-size: 0.85rem;
-        }
-
-        /* Gallery Container - NOW BIGGER */
-        .gallery-wrapper {
-            position: relative;
-            width: 100%;
-            max-width: 700px;
-            height: 78vh;
-            background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 24px;
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-            overflow: hidden;
-        }
-
-        .gallery {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            transition: transform 0.5s cubic-bezier(0.4, 0.0, 0.2, 1);
-        }
-
-        .slide {
-            min-width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 10px;
-            user-select: none;
-        }
-
-        /* Image container now takes MOST of the space */
-        .image-container {
-            position: relative;
-            width: 96%;
-            height: 88%;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 18px;
-            overflow: hidden;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-        }
-
-        .image-container img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-        }
-
-        .image-number {
-            position: absolute;
-            top: 12px;
-            left: 12px;
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(10px);
-            color: white;
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-weight: 700;
-            font-size: 0.95rem;
-            z-index: 10;
-        }
-
-        /* Minimal info at bottom */
-        .slide-info {
-            position: absolute;
-            bottom: 8px;
-            left: 50%;
-            transform: translateX(-50%);
-            text-align: center;
-            z-index: 5;
-        }
-
-        .slide-info h3 {
-            color: white;
-            font-size: 1rem;
-            font-weight: 600;
-            text-shadow: 0 2px 8px rgba(0,0,0,0.5);
-        }
-
-        .dots {
-            display: flex;
-            gap: 10px;
-            margin-top: 18px;
-            justify-content: center;
-        }
-
         .dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.3);
+            width: 8px;
+            height: 8px;
+            background: rgba(200,200,240,0.35);
+            border-radius: 20px;
+            transition: all 0.25s ease;
             cursor: pointer;
-            transition: all 0.3s ease;
         }
-
         .dot.active {
-            background: white;
-            transform: scale(1.3);
-            box-shadow: 0 0 10px rgba(255,255,255,0.5);
+            width: 28px;
+            background: #ffffff;
+            box-shadow: 0 0 8px #fff6;
         }
-
         .dot:hover {
-            background: rgba(255, 255, 255, 0.8);
+            background: rgba(255,255,255,0.7);
         }
 
-        .instagram-btn {
-            position: fixed;
-            bottom: 25px;
-            right: 25px;
-            background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
-            color: white;
-            padding: 14px 22px;
-            border-radius: 30px;
-            text-decoration: none;
-            font-weight: 600;
+        /* client info & cta zone — clear messaging */
+        .client-feedback-area {
+            margin-top: 1.8rem;
             display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            background: rgba(10,10,15,0.55);
+            backdrop-filter: blur(10px);
+            border-radius: 60px;
+            padding: 0.6rem 1.4rem;
+            border: 0.5px solid rgba(255,255,240,0.08);
+        }
+
+        .studio-credit {
+            font-size: 0.8rem;
+            color: #aaa9c2;
+        }
+        .studio-credit strong {
+            color: #f0eefc;
+            font-weight: 600;
+        }
+        .cta-button {
+            background: linear-gradient(105deg, #ffffff 0%, #f2f0ff 100%);
+            border: none;
+            padding: 10px 28px;
+            border-radius: 40px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            display: inline-flex;
             align-items: center;
             gap: 8px;
-            box-shadow: 0 4px 20px rgba(220, 39, 67, 0.4);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            z-index: 100;
-            font-size: 0.95rem;
+            color: #0a0a12;
+            text-decoration: none;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            cursor: pointer;
         }
-
-        .instagram-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 30px rgba(220, 39, 67, 0.6);
+        .cta-button:hover {
+            transform: translateY(-2px);
+            background: white;
+            box-shadow: 0 8px 20px rgba(255,255,255,0.2);
         }
-
-        .instagram-btn svg {
-            width: 22px;
-            height: 22px;
-        }
-
-        .swipe-hint {
-            position: absolute;
-            bottom: 40px;
-            left: 50%;
-            transform: translateX(-50%);
-            color: rgba(255, 255, 255, 0.6);
-            font-size: 0.8rem;
+        .insta-small {
             display: flex;
             align-items: center;
             gap: 6px;
-            animation: swipe 2s infinite;
-            z-index: 2;
+            background: rgba(255,255,255,0.05);
+            padding: 6px 18px;
+            border-radius: 60px;
+            font-size: 0.85rem;
+            text-decoration: none;
+            color: #e1dcff;
+            transition: background 0.2s;
         }
-
-        @keyframes swipe {
-            0%, 100% { transform: translateX(-50%) translateX(0); }
-            50% { transform: translateX(-50%) translateX(-10px); }
-        }
-
-        .loading {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+        .insta-small:hover {
+            background: rgba(255,255,255,0.15);
             color: white;
-            font-size: 1.2rem;
+        }
+        .watermark-right {
+            position: fixed;
+            bottom: 18px;
+            right: 20px;
+            font-size: 0.7rem;
+            color: rgba(255,255,255,0.25);
+            text-align: right;
+            z-index: 20;
+            pointer-events: none;
+            background: rgba(0,0,0,0.3);
+            backdrop-filter: blur(4px);
+            padding: 4px 12px;
+            border-radius: 30px;
+        }
+        .loading-screen {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 15px;
-        }
-
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid rgba(255, 255, 255, 0.3);
-            border-top-color: white;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .nav-arrow {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.25);
-            color: white;
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
             justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            z-index: 10;
-            font-size: 1.5rem;
+            gap: 1rem;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(8px);
+            border-radius: 2rem;
         }
-
-        .nav-arrow:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: translateY(-50%) scale(1.1);
-        }
-
-        .nav-arrow.prev { left: 8px; }
-        .nav-arrow.next { right: 8px; }
-
-        /* Double tap to zoom */
-        .image-container.zoomed img {
-            object-fit: cover;
-            transform: scale(1.5);
-            cursor: zoom-out;
-        }
-
-        @media (max-width: 768px) {
-            .header h1 { font-size: 1.3rem; }
-            .header { padding: 12px 20px; margin-bottom: 12px; }
-            
-            .gallery-wrapper {
-                height: 72vh;
-                border-radius: 18px;
-                max-width: 100%;
-            }
-            
-            .image-container {
-                height: 90%;
-                border-radius: 14px;
-            }
-            
-            .instagram-btn {
-                bottom: 15px;
-                right: 15px;
-                padding: 10px 16px;
-                font-size: 0.85rem;
-            }
-            
-            .nav-arrow {
-                width: 40px;
-                height: 40px;
-                font-size: 1.3rem;
-            }
-            
-            .nav-arrow.prev { left: 5px; }
-            .nav-arrow.next { right: 5px; }
-        }
-
-        @media (max-width: 480px) {
-            .container { padding: 8px; }
-            .header { margin-bottom: 8px; padding: 10px 15px; }
-            .gallery-wrapper { height: 68vh; }
-            .image-container { height: 92%; }
-        }
-
-        .error {
-            background: rgba(255, 100, 100, 0.2);
-            border: 1px solid rgba(255, 100, 100, 0.4);
-            color: white;
-            padding: 20px;
-            border-radius: 15px;
+        .error-message {
+            background: rgba(255,60,60,0.12);
+            border-left: 3px solid #ff8a7a;
+            padding: 1.2rem;
+            border-radius: 24px;
             text-align: center;
-            backdrop-filter: blur(10px);
+            font-size: 0.9rem;
         }
+        button {
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+        @media (max-width: 680px) {
+            .main-container { padding: 0.8rem; }
+            .wyrm-title { font-size: 1.9rem; }
+            .client-feedback-area { border-radius: 28px; padding: 0.6rem 1rem; flex-direction: column; align-items: stretch; text-align: center; }
+            .cta-button { justify-content: center; }
+            .studio-credit { text-align: center; }
+            .watermark-right { bottom: 8px; right: 12px; font-size: 0.6rem; }
+            .img-counter { font-size: 0.7rem; bottom: 0.6rem; left: 0.7rem; }
+        }
+        /* keyboard hint */
+        .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; }
     </style>
 </head>
 <body>
-    <div class="bg-shapes">
-        <div class="shape"></div>
-        <div class="shape"></div>
-        <div class="shape"></div>
+
+<div class="ambient-glow">
+    <div class="orb"></div>
+    <div class="orb"></div>
+</div>
+
+<div class="main-container">
+    <div class="brand-header">
+        <div class="wyrm-title">WYRM STUDIO</div>
+        <div class="client-badge">✦ CLIENT EXCLUSIVE GALLERY ✦</div>
     </div>
 
-    <div class="container">
-        <div class="header">
-            <h1>✨ Review Work</h1>
-            <p>Swipe to see designs • Send feedback on Instagram</p>
+    <div class="gallery-stage">
+        <div class="viewport" id="viewport">
+            <div class="gallery-track" id="galleryTrack"></div>
+            <!-- navigation buttons (unmissable) -->
+            <button class="nav-btn nav-prev" id="prevBtn" aria-label="Previous work">‹</button>
+            <button class="nav-btn nav-next" id="nextBtn" aria-label="Next work">›</button>
         </div>
-
-        <div class="gallery-wrapper" id="galleryWrapper">
-            <div class="loading" id="loading">
-                <div class="spinner"></div>
-                <span>Loading images...</span>
-            </div>
-            <div class="gallery" id="gallery"></div>
-            
-            <button class="nav-arrow prev" onclick="changeSlide(-1)">‹</button>
-            <button class="nav-arrow next" onclick="changeSlide(1)">›</button>
-            
-            <div class="swipe-hint">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M5 12h14M12 5l7 7-7 7"/>
-                </svg>
-                Swipe or double-tap to zoom
-            </div>
-        </div>
-
-        <div class="dots" id="dots"></div>
+        <div class="dot-strip" id="dotsContainer"></div>
     </div>
 
-    <a href="#" class="instagram-btn" target="_blank" id="instaBtn" style="display: none;">
-        <svg viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-        </svg>
-        Send Feedback
-    </a>
+    <div class="client-feedback-area">
+        <div class="studio-credit">
+            <strong>✧ This portfolio is crafted exclusively for you by WYRM.STUDIO</strong><br>
+            Every visual reflects premium design direction.
+        </div>
+        <a href="#" id="directContactBtn" class="cta-button" target="_blank">
+            <span>📩</span> Discuss this work →
+        </a>
+        <a href="https://www.instagram.com/wyrm.studios/" id="instagramHandleLink" class="insta-small" target="_blank">
+            📸 @wyrm.studios
+        </a>
+    </div>
+</div>
+<div class="watermark-right">
+    WYRM.STUDIO — private client delivery
+</div>
 
-    <script>
-        const config = {
-            githubUsername: 'wyrm-studios',
-            githubRepo: 'review.work',
-            folderPath: 'work',
-            instagramUsername: 'wyrm.studios',
-            fileExtensions: ['jpg', 'jpeg', 'png', 'gif', 'webp']
-        };
+<script>
+    // ======================= CONFIGURATION ==========================
+    const CONFIG = {
+        githubOwner: "wyrm-studios",
+        repoName: "review.work",
+        folder: "work",
+        supportedExts: ["jpg", "jpeg", "png", "webp", "gif"]
+    };
 
-        let images = [];
-        let currentIndex = 0;
-        let startX = 0;
-        let currentX = 0;
-        let isDragging = false;
+    let mediaItems = [];          // store { name, url }
+    let currentIdx = 0;
+    let trackEl = document.getElementById('galleryTrack');
+    let dotsContainer = document.getElementById('dotsContainer');
+    let viewport = document.getElementById('viewport');
+    let isDragging = false;
+    let startX = 0;
+    let currentDragX = 0;
+    let dragOffset = 0;
+    let activeZoomContainer = null;   // track zoomed frame
 
-        async function init() {
-            try {
-                await loadImagesFromGitHub();
-                if (images.length > 0) {
-                    renderGallery();
-                    document.getElementById('loading').style.display = 'none';
-                    document.getElementById('instaBtn').style.display = 'flex';
-                    updateInstagramLink();
-                } else {
-                    showError('No images found in the repository');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                showError('Failed to load images. Check repo settings.');
-            }
+    // helper: fetch github folder contents
+    async function fetchImagesFromRepo() {
+        const url = `https://api.github.com/repos/${CONFIG.githubOwner}/${CONFIG.repoName}/contents/${CONFIG.folder}`;
+        const res = await fetch(url);
+        if (!res.ok) {
+            if (res.status === 404) throw new Error("Repository or folder not found. Please ensure 'wyrm-studios/review.work' has /work folder.");
+            throw new Error(`GitHub API error: ${res.status}`);
         }
+        const files = await res.json();
+        if (!Array.isArray(files)) throw new Error("Invalid response from GitHub");
+        
+        const imageFiles = files.filter(file => {
+            if (file.type !== 'file') return false;
+            const ext = file.name.split('.').pop().toLowerCase();
+            return CONFIG.supportedExts.includes(ext);
+        }).sort((a,b) => a.name.localeCompare(b.name, undefined, {numeric: true}));
+        
+        return imageFiles.map(file => ({
+            name: file.name,
+            url: file.download_url,
+            rawName: file.name.replace(/\.[^/.]+$/, '')
+        }));
+    }
 
-        async function loadImagesFromGitHub() {
-            const apiUrl = `https://api.github.com/repos/${config.githubUsername}/${config.githubRepo}/contents/${config.folderPath}`;
-            const response = await fetch(apiUrl);
-            if (!response.ok) throw new Error('Failed to fetch from GitHub');
-            const data = await response.json();
-            
-            images = data
-                .filter(file => {
-                    const ext = file.name.split('.').pop().toLowerCase();
-                    return config.fileExtensions.includes(ext);
-                })
-                .sort((a, b) => a.name.localeCompare(b.name, undefined, {numeric: true}));
+    // render slides
+    function renderGallery() {
+        if (!mediaItems.length) {
+            trackEl.innerHTML = `<div class="slide-card" style="justify-content:center; align-items:center;"><div class="error-message">⚠️ No design assets found in /work folder.<br>Add images to wyrm-studios/review.work/work</div></div>`;
+            return;
         }
-
-        function renderGallery() {
-            const gallery = document.getElementById('gallery');
-            const dotsContainer = document.getElementById('dots');
-            
-            gallery.innerHTML = '';
-            dotsContainer.innerHTML = '';
-            
-            images.forEach((image, index) => {
-                const slide = document.createElement('div');
-                slide.className = 'slide';
-                slide.innerHTML = `
-                    <div class="image-container" data-index="${index}">
-                        <span class="image-number">#${String(index + 1).padStart(2, '0')}</span>
-                        <img src="${image.download_url}" alt="${image.name}" loading="${index === 0 ? 'eager' : 'lazy'}">
-                    </div>
-                `;
-                gallery.appendChild(slide);
-                
-                const dot = document.createElement('div');
-                dot.className = `dot ${index === 0 ? 'active' : ''}`;
-                dot.onclick = () => goToSlide(index);
-                dotsContainer.appendChild(dot);
-            });
-            
-            updateGalleryPosition();
-            setupDoubleTapZoom();
-        }
-
-        function updateGalleryPosition() {
-            const gallery = document.getElementById('gallery');
-            gallery.style.transform = `translateX(-${currentIndex * 100}%)`;
-            
-            document.querySelectorAll('.dot').forEach((dot, index) => {
-                dot.classList.toggle('active', index === currentIndex);
-            });
-        }
-
-        function changeSlide(direction) {
-            currentIndex += direction;
-            if (currentIndex < 0) currentIndex = images.length - 1;
-            if (currentIndex >= images.length) currentIndex = 0;
-            updateGalleryPosition();
-            setTimeout(updateInstagramLink, 100);
-        }
-
-        function goToSlide(index) {
-            currentIndex = index;
-            updateGalleryPosition();
-            setTimeout(updateInstagramLink, 100);
-        }
-
-        function updateInstagramLink() {
-            const currentNumber = String(currentIndex + 1).padStart(2, '0');
-            const btn = document.getElementById('instaBtn');
-            btn.href = `https://www.instagram.com/direct/t/${config.instagramUsername}/?text=${currentNumber}%20-%20I%20love%20it!`;
-        }
-
-        function showError(message) {
-            const loading = document.getElementById('loading');
-            loading.innerHTML = `<div class="error"><p>⚠️ ${message}</p></div>`;
-        }
-
-        // Double tap to zoom
-        function setupDoubleTapZoom() {
-            let lastTap = 0;
-            document.querySelectorAll('.image-container').forEach(container => {
-                container.addEventListener('click', (e) => {
-                    const currentTime = new Date().getTime();
-                    const tapLength = currentTime - lastTap;
-                    if (tapLength < 300 && tapLength > 0) {
-                        container.classList.toggle('zoomed');
-                        e.preventDefault();
-                    }
-                    lastTap = currentTime;
-                });
-            });
-        }
-
-        // Touch/Swipe
-        const galleryWrapper = document.getElementById('galleryWrapper');
-
-        galleryWrapper.addEventListener('touchstart', handleStart, {passive: false});
-        galleryWrapper.addEventListener('touchmove', handleMove, {passive: false});
-        galleryWrapper.addEventListener('touchend', handleEnd, false);
-        galleryWrapper.addEventListener('mousedown', handleStart, false);
-        galleryWrapper.addEventListener('mousemove', handleMove, false);
-        galleryWrapper.addEventListener('mouseup', handleEnd, false);
-        galleryWrapper.addEventListener('mouseleave', handleEnd, false);
-
-        function handleStart(e) {
-            if (e.target.closest('.image-container.zoomed')) return;
-            isDragging = true;
-            startX = e.type.includes('mouse') ? e.pageX : e.touches[0].pageX;
-            galleryWrapper.style.cursor = 'grabbing';
-        }
-
-        function handleMove(e) {
-            if (!isDragging) return;
-            e.preventDefault();
-            currentX = e.type.includes('mouse') ? e.pageX : e.touches[0].pageX;
-            const diff = currentX - startX;
-            const gallery = document.getElementById('gallery');
-            const offset = -(currentIndex * 100) + (diff / galleryWrapper.offsetWidth * 100);
-            gallery.style.transform = `translateX(${offset}%)`;
-        }
-
-        function handleEnd(e) {
-            if (!isDragging) return;
-            isDragging = false;
-            galleryWrapper.style.cursor = 'grab';
-            
-            const diff = currentX - startX;
-            const threshold = 50;
-            
-            if (Math.abs(diff) > threshold) {
-                if (diff > 0) changeSlide(-1);
-                else changeSlide(1);
-            } else {
-                updateGalleryPosition();
-            }
-        }
-
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowLeft') changeSlide(-1);
-            if (e.key === 'ArrowRight') changeSlide(1);
+        trackEl.innerHTML = '';
+        mediaItems.forEach((item, idx) => {
+            const slideDiv = document.createElement('div');
+            slideDiv.className = 'slide-card';
+            const frameDiv = document.createElement('div');
+            frameDiv.className = 'frame';
+            frameDiv.setAttribute('data-frame-idx', idx);
+            const imgEl = document.createElement('img');
+            imgEl.src = item.url;
+            imgEl.alt = `Project ${idx+1}: ${item.name}`;
+            imgEl.loading = idx === 0 ? 'eager' : 'lazy';
+            imgEl.draggable = false;
+            // counter inside frame
+            const counterSpan = document.createElement('div');
+            counterSpan.className = 'img-counter';
+            counterSpan.innerText = `${String(idx+1).padStart(2,'0')} / ${String(mediaItems.length).padStart(2,'0')}`;
+            frameDiv.appendChild(imgEl);
+            frameDiv.appendChild(counterSpan);
+            slideDiv.appendChild(frameDiv);
+            trackEl.appendChild(slideDiv);
         });
+        updateDots();
+        updateSlidePosition();
+        attachZoomEvents();
+    }
 
-        init();
-    </script>
+    function updateDots() {
+        dotsContainer.innerHTML = '';
+        if (mediaItems.length === 0) return;
+        for (let i = 0; i < mediaItems.length; i++) {
+            const dot = document.createElement('div');
+            dot.classList.add('dot');
+            if (i === currentIdx) dot.classList.add('active');
+            dot.addEventListener('click', (e) => {
+                e.stopPropagation();
+                goToSlide(i);
+            });
+            dotsContainer.appendChild(dot);
+        }
+    }
+
+    function updateSlidePosition(animate = true) {
+        if (!trackEl) return;
+        const shiftPercent = -currentIdx * 100;
+        trackEl.style.transition = animate ? 'transform 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1)' : 'none';
+        trackEl.style.transform = `translateX(${shiftPercent}%)`;
+        // update active dot
+        const dots = document.querySelectorAll('.dot');
+        dots.forEach((dot, i) => {
+            if (i === currentIdx) dot.classList.add('active');
+            else dot.classList.remove('active');
+        });
+        // update contact button message - client sees current work index
+        updateContactLink();
+    }
+
+    function goToSlide(newIndex, animate = true) {
+        if (mediaItems.length === 0) return;
+        if (newIndex < 0) newIndex = mediaItems.length - 1;
+        if (newIndex >= mediaItems.length) newIndex = 0;
+        currentIdx = newIndex;
+        updateSlidePosition(animate);
+        // reset any zoom on frame change (clean UX)
+        resetAllZooms();
+    }
+
+    function changeSlide(delta) {
+        goToSlide(currentIdx + delta);
+    }
+
+    function updateContactLink() {
+        const btn = document.getElementById('directContactBtn');
+        if (!btn) return;
+        const currentNumber = String(currentIdx + 1).padStart(2, '0');
+        const projectName = mediaItems[currentIdx]?.name || `design_${currentNumber}`;
+        const instaMsg = `Hi WYRM.STUDIO! I'm interested in the project #${currentNumber} (${projectName}). Can we discuss details?`;
+        const igUrl = `https://www.instagram.com/wyrm.studios/?text=${encodeURIComponent(instaMsg)}`;
+        btn.href = igUrl;
+        // additional direct touch: the button leads to IG with prefilled message
+    }
+
+    // zoom logic: double-tap / click on image, clear when zoom on other
+    function attachZoomEvents() {
+        const frames = document.querySelectorAll('.frame');
+        frames.forEach(frame => {
+            const img = frame.querySelector('img');
+            if (!img) return;
+            // remove old listener to avoid duplication
+            frame.removeEventListener('click', handleZoomClick);
+            frame.addEventListener('click', handleZoomClick);
+        });
+    }
+
+    function handleZoomClick(e) {
+        e.stopPropagation();
+        const frame = e.currentTarget;
+        // if any other frame is zoomed, reset them
+        if (activeZoomContainer && activeZoomContainer !== frame) {
+            activeZoomContainer.classList.remove('zoomed');
+        }
+        frame.classList.toggle('zoomed');
+        if (frame.classList.contains('zoomed')) {
+            activeZoomContainer = frame;
+        } else {
+            if (activeZoomContainer === frame) activeZoomContainer = null;
+        }
+    }
+
+    function resetAllZooms() {
+        if (activeZoomContainer) {
+            activeZoomContainer.classList.remove('zoomed');
+            activeZoomContainer = null;
+        }
+        document.querySelectorAll('.frame').forEach(f => f.classList.remove('zoomed'));
+    }
+
+    // swipe & drag detection (PC + Mobile)
+    function initDragEvents() {
+        const viewportEl = viewport;
+        if (!viewportEl) return;
+        
+        const onDragStart = (e) => {
+            if (e.target.closest('.frame.zoomed')) return;  // no swipe while zoomed
+            isDragging = true;
+            startX = (e.type === 'mousedown' ? e.pageX : e.touches[0].pageX);
+            trackEl.style.transition = 'none';
+            e.preventDefault?.();
+        };
+        
+        const onDragMove = (e) => {
+            if (!isDragging) return;
+            const moveX = (e.type === 'mousemove' ? e.pageX : e.touches[0].pageX);
+            let diff = moveX - startX;
+            const viewportWidth = viewportEl.clientWidth;
+            const percentMove = (diff / viewportWidth) * 100;
+            let currentShift = -currentIdx * 100;
+            let newShift = currentShift + percentMove;
+            trackEl.style.transform = `translateX(${newShift}%)`;
+            dragOffset = diff;
+        };
+        
+        const onDragEnd = () => {
+            if (!isDragging) {
+                trackEl.style.transition = '';
+                return;
+            }
+            isDragging = false;
+            const threshold = 45; // px
+            if (Math.abs(dragOffset) > threshold) {
+                if (dragOffset > 0) {
+                    changeSlide(-1);
+                } else {
+                    changeSlide(1);
+                }
+            } else {
+                updateSlidePosition(true);
+            }
+            dragOffset = 0;
+            trackEl.style.transition = '';
+        };
+        
+        viewportEl.addEventListener('mousedown', onDragStart);
+        window.addEventListener('mousemove', onDragMove);
+        window.addEventListener('mouseup', onDragEnd);
+        viewportEl.addEventListener('touchstart', onDragStart, {passive: false});
+        viewportEl.addEventListener('touchmove', onDragMove, {passive: false});
+        viewportEl.addEventListener('touchend', onDragEnd);
+        viewportEl.addEventListener('touchcancel', onDragEnd);
+        // prevent image drag native
+        viewportEl.addEventListener('dragstart', (e) => e.preventDefault());
+    }
+
+    // keyboard navigation
+    function bindKeyboard() {
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                changeSlide(-1);
+            } else if (e.key === 'ArrowRight') {
+                e.preventDefault();
+                changeSlide(1);
+            } else if (e.key === 'Escape') {
+                resetAllZooms();
+            }
+        });
+    }
+
+    // loading state + error handler
+    async function bootstrap() {
+        showLoadingState(true);
+        try {
+            const items = await fetchImagesFromRepo();
+            if (!items.length) {
+                throw new Error("No supported images found inside /work folder. Please add .jpg/.png/.webp files.");
+            }
+            mediaItems = items;
+            renderGallery();
+            showLoadingState(false);
+            updateContactLink();
+            // after rendering, ensure zoom handlers are reattached if dynamic
+            attachZoomEvents();
+        } catch (err) {
+            console.error(err);
+            showLoadingState(false, err.message);
+        }
+    }
+    
+    function showLoadingState(loading, errorMsg = null) {
+        if (loading) {
+            trackEl.innerHTML = `<div class="slide-card"><div class="loading-screen"><div style="width:40px;height:40px;border:2px solid rgba(255,255,255,0.2);border-top:2px solid white;border-radius:50%;animation:spin 0.8s linear infinite;"></div><span style="color:white;">Loading Your Exclusive Gallery...</span></div></div>`;
+            const styleSpin = document.createElement('style');
+            if (!document.querySelector('#spinStyle')) {
+                styleSpin.id = 'spinStyle';
+                styleSpin.textContent = `@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`;
+                document.head.appendChild(styleSpin);
+            }
+        } else if (errorMsg) {
+            trackEl.innerHTML = `<div class="slide-card"><div class="error-message" style="background: #1a1215;"><strong>⚠️ ${errorMsg}</strong><br><span style="font-size:0.8rem;">WYRM.STUDIO expects images at: github.com/wyrm-studios/review.work/tree/main/work</span></div></div>`;
+            dotsContainer.innerHTML = '';
+        }
+    }
+    
+    // after bootstrap, final ui adjustments
+    function finalUISetup() {
+        const prev = document.getElementById('prevBtn');
+        const next = document.getElementById('nextBtn');
+        if (prev) prev.addEventListener('click', () => changeSlide(-1));
+        if (next) next.addEventListener('click', () => changeSlide(1));
+        initDragEvents();
+        bindKeyboard();
+        // update IG profile link consistently
+        const instaHandle = document.getElementById('instagramHandleLink');
+        if (instaHandle) instaHandle.href = "https://www.instagram.com/wyrm.studios/";
+    }
+    
+    // RUN
+    bootstrap().then(() => {
+        finalUISetup();
+        // guarantee zoom reattach after images load fully
+        setTimeout(() => {
+            attachZoomEvents();
+        }, 200);
+    }).catch(err => {
+        showLoadingState(false, err.message);
+    });
+    
+    // extra image click protection and dynamic zoom reset on slide
+    const originalGoTo = goToSlide;
+    window.goToSlide = goToSlide;
+    // hotfix for dynamic navigation
+    function attachSafeNavigation() {
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        if(prevBtn && !prevBtn.hasListener) {
+            prevBtn.addEventListener('click', () => changeSlide(-1));
+            nextBtn.addEventListener('click', () => changeSlide(1));
+            prevBtn.hasListener = true;
+        }
+    }
+    setTimeout(attachSafeNavigation, 50);
+</script>
 </body>
 </html>
