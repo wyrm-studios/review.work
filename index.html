@@ -21,7 +21,6 @@
             flex-direction: column;
         }
 
-        /* MAIN VAULT */
         .vault {
             width: 100%;
             max-width: 1600px;
@@ -32,7 +31,6 @@
             flex-direction: column;
         }
 
-        /* header / studio identity */
         .studio-header {
             text-align: center;
             margin-bottom: 1rem;
@@ -53,7 +51,6 @@
             font-weight: 700;
         }
 
-        /* SWITCHER — toggle between Images and PDFs */
         .mode-switch {
             display: flex;
             justify-content: center;
@@ -81,7 +78,6 @@
         }
         .mode-btn:active { transform: scale(0.97); }
 
-        /* GALLERY CORE (shared wrapper) */
         .gallery-core {
             width: 100%;
             background: #030303;
@@ -115,7 +111,6 @@
             min-height: 55vh;
         }
 
-        /* IMAGE display — big, perfect size */
         .image-box {
             width: 100%;
             display: flex;
@@ -141,7 +136,6 @@
             transform: scale(1.6);
         }
 
-        /* PDF display — embedded viewer / full interactive */
         .pdf-container {
             width: 100%;
             height: 70vh;
@@ -154,30 +148,20 @@
         }
         .pdf-viewer {
             width: 100%;
-            height: 100%;
+            height: calc(100% - 40px);
             border: none;
             background: white;
         }
-        .pdf-fallback {
-            background: #0f0f17;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            gap: 1rem;
-            height: 100%;
+        .pdf-label {
+            background: #0a0a12;
             text-align: center;
-            color: #bbb;
-        }
-        .pdf-fallback a {
-            color: white;
-            background: #2c2c44;
-            padding: 0.8rem 1.5rem;
-            border-radius: 40px;
-            text-decoration: none;
+            padding: 8px;
+            font-size: 0.75rem;
+            color: #aaa;
+            border-top: 1px solid #222;
+            word-break: break-word;
         }
 
-        /* navigation buttons + counter */
         .nav-arrow {
             position: absolute;
             top: 50%;
@@ -239,7 +223,6 @@
             box-shadow: 0 0 6px #fff8;
         }
 
-        /* delivery statement */
         .delivery-statement {
             text-align: center;
             margin-top: 1.2rem;
@@ -292,6 +275,22 @@
             color: rgba(255,255,255,0.25);
             margin: 0.8rem 0 0.3rem;
         }
+        
+        .debug-panel {
+            background: rgba(0,0,0,0.8);
+            border-top: 1px solid #333;
+            padding: 10px;
+            margin-top: 15px;
+            font-size: 0.7rem;
+            color: #0f0;
+            font-family: monospace;
+            max-height: 150px;
+            overflow-y: auto;
+            display: none;
+        }
+        .debug-panel.show {
+            display: block;
+        }
 
         @media (max-width: 680px) {
             .vault { padding: 0.7rem; }
@@ -302,11 +301,6 @@
             .prev-btn { left: 6px; }
             .next-btn { right: 6px; }
             .mode-btn { padding: 0.5rem 1.2rem; font-size: 0.85rem; }
-            .counter-badge { bottom: 0.8rem; left: 1rem; font-size: 0.7rem; }
-        }
-        @media (min-width: 1200px) {
-            .image-box img { max-height: 78vh; }
-            .pdf-container { height: 75vh; }
         }
 
         .loading-state {
@@ -333,6 +327,14 @@
             color: #ffcfc0;
             text-align: center;
         }
+        .success-box {
+            background: rgba(80,255,80,0.1);
+            border-left: 3px solid #7aff7a;
+            padding: 1rem;
+            border-radius: 20px;
+            color: #ccffcc;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -342,7 +344,6 @@
         <div class="brand"><strong>WYRM STUDIO</strong> · confidential client delivery</div>
     </div>
 
-    <!-- SWITCHER: Images vs PDFs -->
     <div class="mode-switch">
         <button class="mode-btn" id="imagesModeBtn">🖼️ VISUAL WORK</button>
         <button class="mode-btn" id="pdfsModeBtn">📄 DOCUMENTS / PDFs</button>
@@ -367,29 +368,32 @@
         <a href="https://www.instagram.com/wyrm.studios/" class="contact-btn" target="_blank">📸 @wyrm.studios</a>
     </div>
     <div class="watermark-footer">WYRM.STUDIO — client exclusive preview</div>
+    
+    <!-- Debug panel (hidden by default, press Ctrl+Shift+D to show) -->
+    <div class="debug-panel" id="debugPanel"></div>
 </div>
 
 <script>
     // ======================= CONFIG ==========================
+    // UPDATE THESE WITH YOUR ACTUAL REPO INFO
     const REPO_CONFIG = {
-        owner: "wyrm-studios",
-        repo: "review.work",
-        folder: "work",
-        imageExts: ["jpg", "jpeg", "png", "webp", "gif", "avif"],
+        owner: "wyrm-studios",      // CHANGE THIS to your GitHub username
+        repo: "review.work",        // CHANGE THIS to your repo name
+        folder: "work",             // folder inside repo containing files
+        branch: "main",             // usually 'main' or 'master'
+        imageExts: ["jpg", "jpeg", "png", "webp", "gif", "avif", "svg"],
         pdfExt: "pdf"
     };
 
-    // Data states
-    let imageItems = [];     // { name, url }
+    let imageItems = [];
     let pdfItems = [];
-    let currentMode = "images";   // "images" or "pdfs"
+    let currentMode = "images";
     let currentIndex = 0;
     let activeZoomContainer = null;
     let isDragging = false;
     let dragStartX = 0;
     let dragDelta = 0;
     
-    // DOM elements
     const trackElement = document.getElementById('slideTrack');
     const dotsPanel = document.getElementById('dotsPanel');
     const viewport = document.getElementById('viewportGallery');
@@ -398,43 +402,143 @@
     const prevBtn = document.getElementById('prevSlideBtn');
     const nextBtn = document.getElementById('nextSlideBtn');
     const discussBtn = document.getElementById('discussBtn');
+    const debugPanel = document.getElementById('debugPanel');
 
-    // 1) FETCH from GitHub and separate images + PDFs
-    async function fetchAllAssets() {
-        const apiUrl = `https://api.github.com/repos/${REPO_CONFIG.owner}/${REPO_CONFIG.repo}/contents/${REPO_CONFIG.folder}`;
-        const response = await fetch(apiUrl);
-        if (!response.ok) {
-            throw new Error(`GitHub error (${response.status}). Ensure repo: wyrm-studios/review.work/work exists`);
-        }
-        const files = await response.json();
-        if (!Array.isArray(files)) throw new Error("Invalid GitHub response");
-
-        const images = [];
-        const pdfs = [];
-        for (const file of files) {
-            if (file.type !== 'file') continue;
-            const ext = file.name.split('.').pop().toLowerCase();
-            if (REPO_CONFIG.imageExts.includes(ext)) {
-                images.push({ name: file.name, url: file.download_url });
-            } else if (ext === REPO_CONFIG.pdfExt) {
-                pdfs.push({ name: file.name, url: file.download_url });
+    function logToDebug(message, isError = false) {
+        const timestamp = new Date().toLocaleTimeString();
+        const logLine = `[${timestamp}] ${message}`;
+        console.log(logLine);
+        if (debugPanel) {
+            const div = document.createElement('div');
+            div.textContent = logLine;
+            div.style.color = isError ? '#ff8888' : '#88ff88';
+            div.style.margin = '2px 0';
+            debugPanel.appendChild(div);
+            debugPanel.scrollTop = debugPanel.scrollHeight;
+            // Keep last 50 lines
+            while (debugPanel.children.length > 50) {
+                debugPanel.removeChild(debugPanel.firstChild);
             }
         }
-        // sort alphanumerically
-        const sortFn = (a,b) => a.name.localeCompare(b.name, undefined, {numeric: true});
-        images.sort(sortFn);
-        pdfs.sort(sortFn);
-        return { images, pdfs };
     }
 
-    // 2) RENDER based on current mode
+    // Try multiple methods to fetch from GitHub
+    async function fetchFromGitHub() {
+        // Method 1: Use GitHub API with raw.githubusercontent.com fallback
+        const apiUrl = `https://api.github.com/repos/${REPO_CONFIG.owner}/${REPO_CONFIG.repo}/contents/${REPO_CONFIG.folder}?ref=${REPO_CONFIG.branch}`;
+        
+        logToDebug(`Fetching from: ${apiUrl}`);
+        
+        try {
+            const response = await fetch(apiUrl, {
+                headers: {
+                    'Accept': 'application/vnd.github.v3+json'
+                }
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
+            const data = await response.json();
+            logToDebug(`Success! Found ${data.length} items in folder`);
+            
+            if (!Array.isArray(data)) {
+                throw new Error('Invalid response format');
+            }
+            
+            return data;
+        } catch (error) {
+            logToDebug(`GitHub API failed: ${error.message}`, true);
+            
+            // Method 2: Try using raw.githubusercontent.com listing (won't work directly, but we can try another approach)
+            // Method 3: Suggest manual config
+            logToDebug(`Trying alternative: Please ensure repo is public and folder exists`, true);
+            throw new Error(`Cannot access repo. Make sure:
+1. Repo "${REPO_CONFIG.owner}/${REPO_CONFIG.repo}" is PUBLIC
+2. Folder "${REPO_CONFIG.folder}" exists in the ${REPO_CONFIG.branch} branch
+3. Files have correct extensions (${REPO_CONFIG.imageExts.join(', ')}, .pdf)
+4. No rate limiting (GitHub allows 60 unauthenticated requests/hour)`);
+        }
+    }
+
+    async function loadAssets() {
+        showLoading(true);
+        try {
+            const files = await fetchFromGitHub();
+            
+            const images = [];
+            const pdfs = [];
+            
+            for (const file of files) {
+                if (file.type !== 'file') continue;
+                const ext = file.name.split('.').pop().toLowerCase();
+                const downloadUrl = file.download_url || `https://raw.githubusercontent.com/${REPO_CONFIG.owner}/${REPO_CONFIG.repo}/${REPO_CONFIG.branch}/${REPO_CONFIG.folder}/${encodeURIComponent(file.name)}`;
+                
+                if (REPO_CONFIG.imageExts.includes(ext)) {
+                    images.push({ name: file.name, url: downloadUrl });
+                    logToDebug(`✅ Found image: ${file.name}`);
+                } else if (ext === REPO_CONFIG.pdfExt) {
+                    pdfs.push({ name: file.name, url: downloadUrl });
+                    logToDebug(`✅ Found PDF: ${file.name}`);
+                }
+            }
+            
+            // Sort alphabetically
+            const sortFn = (a,b) => a.name.localeCompare(b.name, undefined, {numeric: true});
+            images.sort(sortFn);
+            pdfs.sort(sortFn);
+            
+            imageItems = images;
+            pdfItems = pdfs;
+            
+            logToDebug(`📊 Summary: ${imageItems.length} images, ${pdfItems.length} PDFs`);
+            
+            if (imageItems.length === 0 && pdfItems.length === 0) {
+                throw new Error(`No images or PDFs found in "/${REPO_CONFIG.folder}" folder. Add files with correct extensions.`);
+            }
+            
+            // Set default mode
+            if (imageItems.length > 0) {
+                setMode("images");
+            } else if (pdfItems.length > 0) {
+                setMode("pdfs");
+            }
+            
+            showLoading(false);
+            
+            // Show debug info briefly then auto-hide after 3 seconds? No, keep but user can close
+            setTimeout(() => {
+                if (debugPanel) {
+                    debugPanel.classList.add('show');
+                    setTimeout(() => {
+                        // Optional: auto-hide after 10 seconds
+                        // debugPanel.classList.remove('show');
+                    }, 10000);
+                }
+            }, 500);
+            
+        } catch (error) {
+            logToDebug(`FATAL ERROR: ${error.message}`, true);
+            showLoading(false, error.message);
+        }
+    }
+
     function renderCurrentMode() {
         if (!trackElement) return;
         const items = (currentMode === "images") ? imageItems : pdfItems;
+        
         if (items.length === 0) {
-            trackElement.innerHTML = `<div class="slide" style="justify-content:center;"><div class="error-box">📭 No ${currentMode === "images" ? "images" : "PDFs"} found in /work folder.<br>Add files to wyrm-studios/review.work/work</div></div>`;
+            trackElement.innerHTML = `<div class="slide" style="justify-content:center;">
+                <div class="error-box">
+                    📭 No ${currentMode === "images" ? "images" : "PDFs"} found in <strong>/${REPO_CONFIG.folder}</strong> folder<br><br>
+                    <strong>📁 Required path:</strong><br>
+                    github.com/${REPO_CONFIG.owner}/${REPO_CONFIG.repo}/blob/${REPO_CONFIG.branch}/${REPO_CONFIG.folder}/<br><br>
+                    Add ${currentMode === "images" ? ".jpg, .png, .webp" : ".pdf"} files to this folder.
+                </div>
+            </div>`;
             if (dotsPanel) dotsPanel.innerHTML = '';
-            updateCounterBadge(0,0);
+            updateCounterBadge(0, 0);
             return;
         }
         
@@ -442,6 +546,7 @@
         items.forEach((item, idx) => {
             const slideDiv = document.createElement('div');
             slideDiv.className = 'slide';
+            
             if (currentMode === "images") {
                 const imageBox = document.createElement('div');
                 imageBox.className = 'image-box';
@@ -451,23 +556,28 @@
                 img.alt = `Client work ${idx+1}: ${item.name}`;
                 img.loading = idx === 0 ? 'eager' : 'lazy';
                 img.draggable = false;
+                img.onerror = () => {
+                    img.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 24 24" fill="none" stroke="%23ff6666" stroke-width="2"%3E%3Crect x="3" y="3" width="18" height="18" rx="2"%3E%3C/rect%3E%3Cline x1="3" y1="9" x2="21" y2="9"%3E%3C/line%3E%3Cline x1="9" y1="21" x2="9" y2="15"%3E%3C/line%3E%3C/svg%3E';
+                    img.style.objectFit = 'contain';
+                    logToDebug(`❌ Failed to load image: ${item.name}`, true);
+                };
                 imageBox.appendChild(img);
                 slideDiv.appendChild(imageBox);
             } 
-            else {  // PDF mode
+            else {
                 const pdfContainer = document.createElement('div');
                 pdfContainer.className = 'pdf-container';
-                // Use embed for best preview (mobile friendly)
                 const viewer = document.createElement('iframe');
                 viewer.className = 'pdf-viewer';
                 viewer.src = item.url;
                 viewer.title = `PDF: ${item.name}`;
                 viewer.setAttribute('allow', 'fullscreen');
-                // Fallback iframe fails gracefully
+                viewer.onerror = () => {
+                    logToDebug(`❌ Failed to load PDF: ${item.name}`, true);
+                };
                 pdfContainer.appendChild(viewer);
-                // Small label under PDF (optional)
                 const pdfLabel = document.createElement('div');
-                pdfLabel.style.cssText = 'background:#0a0a12; text-align:center; padding:6px; font-size:0.7rem; color:#aaa; border-top:1px solid #222;';
+                pdfLabel.className = 'pdf-label';
                 pdfLabel.innerText = `📄 ${item.name}`;
                 pdfContainer.appendChild(pdfLabel);
                 slideDiv.appendChild(pdfContainer);
@@ -477,7 +587,7 @@
         
         updateDotsUI(items.length);
         updateSlideTransform(false);
-        attachZoomForImages(); // only relevant for image mode
+        attachZoomForImages();
         updateCounterBadge(items.length, currentIndex);
         updateContactMessage();
     }
@@ -503,10 +613,9 @@
         const total = (currentMode === "images") ? imageItems.length : pdfItems.length;
         if (total === 0) return;
         const percent = -currentIndex * 100;
-        trackElement.style.transition = withTransition ? 'transform 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1)' : 'none';
+        trackElement.style.transition = withTransition ? 'transform 0.4s cubic-bezier(0.2, 0.85, 0.3, 1)' : 'none';
         trackElement.style.transform = `translateX(${percent}%)`;
         
-        // update dots active
         const allDots = document.querySelectorAll('.dot-nav');
         allDots.forEach((dot, idx) => {
             if (idx === currentIndex) dot.classList.add('active');
@@ -543,20 +652,19 @@
 
     function updateCounterBadge(total, idx) {
         let badge = document.querySelector('.counter-badge');
-        if (!badge) {
+        if (!badge && viewport) {
             const newBadge = document.createElement('div');
             newBadge.className = 'counter-badge';
-            viewport?.appendChild(newBadge);
+            viewport.appendChild(newBadge);
             badge = newBadge;
         }
-        if (total > 0) {
+        if (badge && total > 0) {
             badge.textContent = `${String(idx+1).padStart(2,'0')} / ${String(total).padStart(2,'0')}`;
-        } else {
+        } else if (badge) {
             badge.textContent = `0 / 0`;
         }
     }
 
-    // zoom logic (images only)
     function attachZoomForImages() {
         const allImageBoxes = document.querySelectorAll('.image-box');
         allImageBoxes.forEach(box => {
@@ -584,7 +692,6 @@
         document.querySelectorAll('.image-box').forEach(b => b.classList.remove('zoomed'));
     }
 
-    // SWIPE + DRAG (for both modes)
     function initDragEvents() {
         if (!viewport) return;
         let startPointer = 0;
@@ -592,7 +699,7 @@
         let startTransformPercent = 0;
         
         const onStart = (e) => {
-            if (currentMode === "images" && activeZoomContainer) return; // avoid conflict while zoomed
+            if (currentMode === "images" && activeZoomContainer) return;
             isSwiping = true;
             startPointer = (e.type === 'mousedown' ? e.pageX : e.touches[0].pageX);
             const transform = trackElement.style.transform;
@@ -631,7 +738,6 @@
         viewport.addEventListener('touchmove', onMove, { passive: false });
         viewport.addEventListener('touchend', onEnd);
         viewport.addEventListener('touchcancel', onEnd);
-        viewport.addEventListener('dragstart', (e) => e.preventDefault());
     }
 
     function bindKeyboard() {
@@ -639,15 +745,17 @@
             if (e.key === 'ArrowLeft') { e.preventDefault(); changeSlide(-1); }
             else if (e.key === 'ArrowRight') { e.preventDefault(); changeSlide(1); }
             else if (e.key === 'Escape') resetAllZooms();
+            else if (e.key === 'd' && e.ctrlKey && e.shiftKey) {
+                debugPanel.classList.toggle('show');
+            }
         });
     }
 
-    // Mode switching
     function setMode(mode) {
         if (mode === currentMode) return;
         currentMode = mode;
-        currentIndex = 0;  // reset index when switching
-        // update active button style
+        currentIndex = 0;
+        
         if (mode === "images") {
             imagesModeBtn.classList.add('active');
             pdfsModeBtn.classList.remove('active');
@@ -660,53 +768,46 @@
         resetAllZooms();
     }
 
-    async function bootstrap() {
-        showLoading(true);
-        try {
-            const { images, pdfs } = await fetchAllAssets();
-            imageItems = images;
-            pdfItems = pdfs;
-            if (imageItems.length === 0 && pdfItems.length === 0) {
-                throw new Error("No images or PDFs found in the /work folder.");
-            }
-            // default mode: images if available, else pdfs
-            if (imageItems.length > 0) setMode("images");
-            else if (pdfItems.length > 0) setMode("pdfs");
-            else throw new Error("No assets found");
-            showLoading(false);
-        } catch (err) {
-            console.error(err);
-            showLoading(false, err.message);
-        }
-    }
-
     function showLoading(loading, errorMsg = null) {
         if (!trackElement) return;
         if (loading) {
-            trackElement.innerHTML = `<div class="slide"><div class="loading-state"><div class="spinner"></div><span>Loading your secure gallery (images + PDFs)...</span></div></div>`;
+            trackElement.innerHTML = `<div class="slide"><div class="loading-state"><div class="spinner"></div><span>🔍 Loading from GitHub: ${REPO_CONFIG.owner}/${REPO_CONFIG.repo}/${REPO_CONFIG.folder}</span></div></div>`;
             if (dotsPanel) dotsPanel.innerHTML = '';
         } else if (errorMsg) {
-            trackElement.innerHTML = `<div class="slide"><div class="error-box"><strong>⚠️ ${errorMsg}</strong><br>Make sure your GitHub repo: wyrm-studios/review.work/work contains images (.jpg, .png) and/or PDFs.</div></div>`;
+            trackElement.innerHTML = `<div class="slide"><div class="error-box">
+                <strong>⚠️ ${errorMsg}</strong><br><br>
+                <strong>🔧 Quick fix guide:</strong><br>
+                1. Make sure repo is PUBLIC: <span style="color:#ffaa00;">${REPO_CONFIG.owner}/${REPO_CONFIG.repo}</span><br>
+                2. Folder exists: <span style="color:#ffaa00;">${REPO_CONFIG.folder}</span><br>
+                3. Branch name: <span style="color:#ffaa00;">${REPO_CONFIG.branch}</span><br>
+                4. Add at least one .jpg or .png inside /${REPO_CONFIG.folder}<br><br>
+                <span style="font-size:0.7rem;">💡 Press Ctrl+Shift+D to show debug console</span>
+            </div></div>`;
         }
     }
 
-    // Event binding for UI
     function bindButtons() {
         prevBtn.addEventListener('click', () => changeSlide(-1));
         nextBtn.addEventListener('click', () => changeSlide(1));
-        imagesModeBtn.addEventListener('click', () => { if (imageItems.length) setMode("images"); else alert("No images found in /work folder"); });
-        pdfsModeBtn.addEventListener('click', () => { if (pdfItems.length) setMode("pdfs"); else alert("No PDFs found in /work folder"); });
+        imagesModeBtn.addEventListener('click', () => { if (imageItems.length) setMode("images"); else alert(`No images found in /${REPO_CONFIG.folder} folder`); });
+        pdfsModeBtn.addEventListener('click', () => { if (pdfItems.length) setMode("pdfs"); else alert(`No PDFs found in /${REPO_CONFIG.folder} folder`); });
         initDragEvents();
         bindKeyboard();
     }
 
-    bootstrap().then(() => {
+    // Show debug on Ctrl+Shift+D
+    document.addEventListener('keydown', (e) => {
+        if (e.ctrlKey && e.shiftKey && e.key === 'D') {
+            debugPanel.classList.toggle('show');
+        }
+    });
+
+    loadAssets().then(() => {
         bindButtons();
-        // additional fix: ensure pdf iframe touch scroll not blocked
-        const style = document.createElement('style');
-        style.textContent = `.pdf-viewer { width: 100%; height: 100%; background: white; }`;
-        document.head.appendChild(style);
-    }).catch(e => showLoading(false, e.message));
+        logToDebug('✨ Gallery initialized successfully');
+    }).catch(e => {
+        logToDebug(`Init failed: ${e.message}`, true);
+    });
 </script>
 </body>
 </html>
