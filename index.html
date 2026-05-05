@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
     <title>WYRM STUDIO · Client Vault (Images + PDFs)</title>
+    <!-- PDF.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    </script>
     <style>
         * {
             margin: 0;
@@ -143,30 +148,43 @@
             transform: scale(1.6);
         }
 
-        .pdf-container {
+        /* PDF Page Container */
+        .pdf-page-container {
             width: 100%;
-            height: 70vh;
-            background: #1a1a24;
-            border-radius: 24px;
-            overflow: hidden;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
             display: flex;
             flex-direction: column;
+            align-items: center;
+            background: #0a0a12;
+            border-radius: 24px;
+            padding: 1rem;
+            max-height: 75vh;
+            overflow: hidden;
         }
-        .pdf-viewer {
-            width: 100%;
-            height: calc(100% - 40px);
-            border: none;
+        
+        .pdf-page-canvas {
+            max-width: 100%;
+            max-height: 65vh;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
             background: white;
         }
-        .pdf-label {
-            background: #0a0a12;
+        
+        .pdf-page-info {
+            margin-top: 1rem;
             text-align: center;
-            padding: 8px;
-            font-size: 0.75rem;
             color: #aaa;
-            border-top: 1px solid #222;
-            word-break: break-word;
+            font-size: 0.85rem;
+        }
+        
+        .pdf-page-number {
+            background: rgba(255,255,255,0.1);
+            padding: 0.3rem 1rem;
+            border-radius: 20px;
+            display: inline-block;
+            margin-top: 0.5rem;
         }
 
         .nav-arrow {
@@ -308,11 +326,24 @@
         .debug-success { color: #66ff66; }
         .debug-info { color: #66ccff; }
 
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            vertical-align: middle;
+            margin-left: 8px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
         @media (max-width: 680px) {
             .vault { padding: 0.7rem; }
             .slide { padding: 0.8rem; }
             .image-box img { max-height: 60vh; }
-            .pdf-container { height: 55vh; }
+            .pdf-page-canvas { max-height: 55vh; }
             .nav-arrow { width: 42px; height: 42px; font-size: 1.6rem; }
             .prev-btn { left: 6px; }
             .next-btn { right: 6px; }
@@ -353,28 +384,6 @@
             border-radius: 4px;
             font-family: monospace;
         }
-        .success-box {
-            background: rgba(80,255,80,0.1);
-            border-left: 3px solid #7aff7a;
-            padding: 1rem;
-            border-radius: 20px;
-            color: #ccffcc;
-            text-align: center;
-        }
-        .file-list {
-            margin-top: 1rem;
-            padding: 1rem;
-            background: rgba(255,255,255,0.05);
-            border-radius: 12px;
-            max-height: 150px;
-            overflow-y: auto;
-        }
-        .file-item {
-            padding: 4px 0;
-            font-size: 0.85rem;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-        .file-item:last-child { border-bottom: none; }
     </style>
 </head>
 <body>
@@ -409,7 +418,6 @@
     </div>
     <div class="watermark-footer">WYRM.STUDIO — client exclusive preview</div>
     
-    <!-- Debug panel (press Ctrl+Shift+D to toggle) -->
     <div class="debug-panel" id="debugPanel"></div>
 </div>
 
@@ -460,14 +468,12 @@
             debugPanel.appendChild(div);
             debugPanel.scrollTop = debugPanel.scrollHeight;
             
-            // Keep last 100 lines
             while (debugPanel.children.length > 100) {
                 debugPanel.removeChild(debugPanel.firstChild);
             }
         }
     }
 
-    // Fetch files from GitHub
     async function fetchFromGitHub() {
         const apiUrl = `https://api.github.com/repos/${REPO_CONFIG.owner}/${REPO_CONFIG.repo}/contents/${REPO_CONFIG.folder}`;
         
@@ -501,7 +507,6 @@
         }
     }
 
-    // Process files and separate images from PDFs
     function processFiles(files) {
         const images = [];
         const pdfs = [];
@@ -517,7 +522,6 @@
             const ext = file.name.split('.').pop().toLowerCase();
             const downloadUrl = file.download_url;
             
-            // Fallback URL if download_url is missing
             const fallbackUrl = `https://raw.githubusercontent.com/${REPO_CONFIG.owner}/${REPO_CONFIG.repo}/${REPO_CONFIG.branch}/${REPO_CONFIG.folder}/${encodeURIComponent(file.name)}`;
             const finalUrl = downloadUrl || fallbackUrl;
             
@@ -542,7 +546,6 @@
             }
         });
         
-        // Sort alphabetically (case-insensitive, natural sort)
         const sortFn = (a, b) => a.name.localeCompare(b.name, undefined, {numeric: true, sensitivity: 'base'});
         images.sort(sortFn);
         pdfs.sort(sortFn);
@@ -561,6 +564,67 @@
         return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
     }
 
+    // Render PDF page as canvas
+    async function renderPDFPage(pdfUrl, pageNum, container) {
+        try {
+            log(`📄 Rendering PDF page ${pageNum} from ${pdfUrl}`, 'info');
+            
+            const loadingTask = pdfjsLib.getDocument(pdfUrl);
+            const pdf = await loadingTask.promise;
+            
+            if (pageNum > pdf.numPages) {
+                throw new Error(`Page ${pageNum} does not exist. PDF has ${pdf.numPages} pages.`);
+            }
+            
+            const page = await pdf.getPage(pageNum);
+            
+            // Set scale for good quality
+            const scale = 1.5;
+            const viewport = page.getViewport({ scale });
+            
+            // Create canvas
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            canvas.height = viewport.height;
+            canvas.width = viewport.width;
+            canvas.className = 'pdf-page-canvas';
+            
+            // Render page
+            const renderContext = {
+                canvasContext: context,
+                viewport: viewport
+            };
+            
+            await page.render(renderContext).promise;
+            
+            // Clear container and add canvas
+            container.innerHTML = '';
+            container.appendChild(canvas);
+            
+            // Add page info
+            const pageInfo = document.createElement('div');
+            pageInfo.className = 'pdf-page-info';
+            pageInfo.innerHTML = `
+                <div>Page <strong>${pageNum}</strong> of ${pdf.numPages}</div>
+                <div class="pdf-page-number">📄 ${pageNum} / ${pdf.numPages}</div>
+            `;
+            container.appendChild(pageInfo);
+            
+            log(`✅ Rendered PDF page ${pageNum}/${pdf.numPages}`, 'success');
+            
+            // Cleanup
+            await pdf.cleanup();
+            
+        } catch (error) {
+            log(`❌ Failed to render PDF page ${pageNum}: ${error.message}`, 'error');
+            container.innerHTML = `<div style="color: #ff6666; text-align: center; padding: 2rem;">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">📄</div>
+                <div>Failed to load PDF page</div>
+                <div style="font-size: 0.85rem; margin-top: 0.5rem; opacity: 0.7;">${error.message}</div>
+            </div>`;
+        }
+    }
+
     async function loadAssets() {
         showLoading(true);
         
@@ -575,7 +639,6 @@
                 throw new Error(`No images or PDFs found in "/${REPO_CONFIG.folder}" folder. Please add files with extensions: .jpg, .png, .webp, .gif, .pdf`);
             }
             
-            // Set initial mode
             if (images.length > 0) {
                 setMode("images");
             } else {
@@ -590,9 +653,7 @@
             }
             
             showLoading(false);
-            showFileList();
             
-            // Show debug panel briefly
             setTimeout(() => {
                 if (debugPanel) debugPanel.classList.add('show');
             }, 1000);
@@ -601,22 +662,6 @@
             log(`💥 FATAL ERROR: ${error.message}`, 'error');
             showLoading(false, error.message);
         }
-    }
-
-    function showFileList() {
-        const items = currentMode === "images" ? imageItems : pdfItems;
-        if (items.length === 0) return;
-        
-        let html = '<div class="file-list"><strong>📁 Files loaded:</strong><br>';
-        items.forEach((item, idx) => {
-            html += `<div class="file-item">${idx + 1}. ${item.name} (${formatBytes(item.size)})</div>`;
-        });
-        html += '</div>';
-        
-        // Add to debug panel
-        const fileListDiv = document.createElement('div');
-        fileListDiv.innerHTML = html;
-        debugPanel.insertBefore(fileListDiv, debugPanel.firstChild);
     }
 
     function renderCurrentMode() {
@@ -666,27 +711,27 @@
                 slideDiv.appendChild(imageBox);
             } 
             else {
+                // PDF rendering
                 const pdfContainer = document.createElement('div');
-                pdfContainer.className = 'pdf-container';
+                pdfContainer.className = 'pdf-page-container';
+                pdfContainer.setAttribute('data-pdf-url', item.url);
+                pdfContainer.setAttribute('data-pdf-name', item.name);
                 
-                const viewer = document.createElement('iframe');
-                viewer.className = 'pdf-viewer';
-                viewer.src = item.url;
-                viewer.title = `PDF: ${item.name}`;
-                viewer.setAttribute('allow', 'fullscreen');
-                
-                viewer.onerror = () => {
-                    log(`❌ Failed to load PDF: ${item.name}`, 'error');
-                };
-                
-                pdfContainer.appendChild(viewer);
-                
-                const pdfLabel = document.createElement('div');
-                pdfLabel.className = 'pdf-label';
-                pdfLabel.innerHTML = `📄 ${item.name} <span style="opacity:0.6">(${formatBytes(item.size)})</span>`;
-                pdfContainer.appendChild(pdfLabel);
+                // Loading state
+                pdfContainer.innerHTML = `
+                    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 3rem; color: #888;">
+                        <div class="spinner" style="width: 40px; height: 40px; margin-bottom: 1rem;"></div>
+                        <div>Loading PDF...</div>
+                        <div style="font-size: 0.85rem; margin-top: 0.5rem;">${item.name}</div>
+                    </div>
+                `;
                 
                 slideDiv.appendChild(pdfContainer);
+                
+                // Render first page when slide is visible
+                setTimeout(() => {
+                    renderPDFPage(item.url, 1, pdfContainer);
+                }, 100 + (idx * 200)); // Stagger loading
             }
             
             trackElement.appendChild(slideDiv);
@@ -960,11 +1005,11 @@
         bindKeyboard();
     }
 
-    // Initialize
     document.addEventListener('DOMContentLoaded', () => {
         log('🚀 WYRM STUDIO Client Vault initializing...', 'info');
         log(`📂 Repository: ${REPO_CONFIG.owner}/${REPO_CONFIG.repo}`, 'info');
         log(`📁 Folder: ${REPO_CONFIG.folder}`, 'info');
+        log(`📄 Using PDF.js for page-by-page rendering`, 'info');
         
         loadAssets().then(() => {
             bindButtons();
@@ -974,7 +1019,6 @@
         });
     });
 
-    // Toggle debug panel with Ctrl+Shift+D
     document.addEventListener('keydown', (e) => {
         if (e.ctrlKey && e.shiftKey && e.key === 'D') {
             e.preventDefault();
