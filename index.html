@@ -148,7 +148,6 @@
             transform: scale(1.6);
         }
 
-        /* PDF Page Container */
         .pdf-page-container {
             width: 100%;
             display: flex;
@@ -432,8 +431,7 @@
         pdfExt: "pdf"
     };
 
-    let imageItems = [];
-    let pdfItems = [];
+    let allItems = []; // Combined array of images and PDF pages
     let currentMode = "images";
     let currentIndex = 0;
     let activeZoomContainer = null;
@@ -507,11 +505,17 @@
         }
     }
 
-    function processFiles(files) {
-        const images = [];
-        const pdfs = [];
+    async function processFiles(files) {
+        const items = [];
+        let imageCount = 0;
+        let pdfCount = 0;
+        let totalPages = 0;
         
         log(`🔍 Processing ${files.length} files...`, 'info');
+        
+        // First, separate images and PDFs
+        const images = [];
+        const pdfs = [];
         
         files.forEach(file => {
             if (file.type !== 'file') {
@@ -521,7 +525,6 @@
             
             const ext = file.name.split('.').pop().toLowerCase();
             const downloadUrl = file.download_url;
-            
             const fallbackUrl = `https://raw.githubusercontent.com/${REPO_CONFIG.owner}/${REPO_CONFIG.repo}/${REPO_CONFIG.branch}/${REPO_CONFIG.folder}/${encodeURIComponent(file.name)}`;
             const finalUrl = downloadUrl || fallbackUrl;
             
@@ -546,13 +549,67 @@
             }
         });
         
+        // Sort
         const sortFn = (a, b) => a.name.localeCompare(b.name, undefined, {numeric: true, sensitivity: 'base'});
         images.sort(sortFn);
         pdfs.sort(sortFn);
         
-        log(`📊 Summary: ${images.length} images, ${pdfs.length} PDFs`, 'success');
+        // Add images to items array
+        images.forEach(img => {
+            items.push({
+                type: 'image',
+                name: img.name,
+                url: img.url,
+                size: img.size
+            });
+            imageCount++;
+        });
         
-        return { images, pdfs };
+        // Process PDFs and extract all pages
+        for (const pdf of pdfs) {
+            try {
+                log(`📖 Loading PDF to count pages: ${pdf.name}`, 'info');
+                const loadingTask = pdfjsLib.getDocument(pdf.url);
+                const pdfDoc = await loadingTask.promise;
+                const numPages = pdfDoc.numPages;
+                
+                log(`📄 PDF "${pdf.name}" has ${numPages} pages`, 'success');
+                totalPages += numPages;
+                
+                // Create an item for each page
+                for (let pageNum = 1; pageNum <= numPages; pageNum++) {
+                    items.push({
+                        type: 'pdf-page',
+                        name: pdf.name,
+                        url: pdf.url,
+                        pageNum: pageNum,
+                        totalPages: numPages,
+                        size: pdf.size
+                    });
+                }
+                
+                pdfCount++;
+                await pdfDoc.cleanup();
+                
+            } catch (error) {
+                log(`❌ Failed to process PDF ${pdf.name}: ${error.message}`, 'error');
+                // Still add it as a single item even if we can't count pages
+                items.push({
+                    type: 'pdf-page',
+                    name: pdf.name,
+                    url: pdf.url,
+                    pageNum: 1,
+                    totalPages: 1,
+                    size: pdf.size,
+                    error: true
+                });
+            }
+        }
+        
+        log(`📊 Summary: ${imageCount} images, ${pdfCount} PDFs (${totalPages} total pages)`, 'success');
+        log(`📋 Total gallery items: ${items.length}`, 'success');
+        
+        return items;
     }
 
     function formatBytes(bytes) {
@@ -578,18 +635,15 @@
             
             const page = await pdf.getPage(pageNum);
             
-            // Set scale for good quality
             const scale = 1.5;
             const viewport = page.getViewport({ scale });
             
-            // Create canvas
             const canvas = document.createElement('canvas');
             const context = canvas.getContext('2d');
             canvas.height = viewport.height;
             canvas.width = viewport.width;
             canvas.className = 'pdf-page-canvas';
             
-            // Render page
             const renderContext = {
                 canvasContext: context,
                 viewport: viewport
@@ -597,11 +651,9 @@
             
             await page.render(renderContext).promise;
             
-            // Clear container and add canvas
             container.innerHTML = '';
             container.appendChild(canvas);
             
-            // Add page info
             const pageInfo = document.createElement('div');
             pageInfo.className = 'pdf-page-info';
             pageInfo.innerHTML = `
@@ -612,7 +664,6 @@
             
             log(`✅ Rendered PDF page ${pageNum}/${pdf.numPages}`, 'success');
             
-            // Cleanup
             await pdf.cleanup();
             
         } catch (error) {
@@ -630,26 +681,26 @@
         
         try {
             const files = await fetchFromGitHub();
-            const { images, pdfs } = processFiles(files);
+            allItems = await processFiles(files);
             
-            imageItems = images;
-            pdfItems = pdfs;
-            
-            if (images.length === 0 && pdfs.length === 0) {
+            if (allItems.length === 0) {
                 throw new Error(`No images or PDFs found in "/${REPO_CONFIG.folder}" folder. Please add files with extensions: .jpg, .png, .webp, .gif, .pdf`);
             }
             
-            if (images.length > 0) {
-                setMode("images");
-            } else {
-                setMode("pdfs");
+            // Check if we have both types
+            const hasImages = allItems.some(item => item.type === 'image');
+            const hasPDFs = allItems.some(item => item.type === 'pdf-page');
+            
+            if (!hasImages) {
                 imagesModeBtn.disabled = true;
                 imagesModeBtn.title = "No images available";
-            }
-            
-            if (pdfs.length === 0) {
+                setMode("pdfs");
+            } else if (!hasPDFs) {
                 pdfsModeBtn.disabled = true;
                 pdfsModeBtn.title = "No PDFs available";
+                setMode("images");
+            } else {
+                setMode("all");
             }
             
             showLoading(false);
@@ -666,9 +717,16 @@
 
     function renderCurrentMode() {
         if (!trackElement) return;
-        const items = (currentMode === "images") ? imageItems : pdfItems;
         
-        if (items.length === 0) {
+        // Filter items based on mode
+        let displayItems = allItems;
+        if (currentMode === "images") {
+            displayItems = allItems.filter(item => item.type === 'image');
+        } else if (currentMode === "pdfs") {
+            displayItems = allItems.filter(item => item.type === 'pdf-page');
+        }
+        
+        if (displayItems.length === 0) {
             trackElement.innerHTML = `<div class="slide" style="justify-content:center;">
                 <div class="error-box">
                     📭 No ${currentMode === "images" ? "images" : "PDFs"} found<br><br>
@@ -682,11 +740,11 @@
         }
         
         trackElement.innerHTML = '';
-        items.forEach((item, idx) => {
+        displayItems.forEach((item, idx) => {
             const slideDiv = document.createElement('div');
             slideDiv.className = 'slide';
             
-            if (currentMode === "images") {
+            if (item.type === 'image') {
                 const imageBox = document.createElement('div');
                 imageBox.className = 'image-box';
                 imageBox.setAttribute('data-idx', idx);
@@ -699,7 +757,7 @@
                 
                 img.onerror = () => {
                     log(`❌ Failed to load image: ${item.name}`, 'error');
-                    img.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 24 24" fill="none" stroke="%23ff6666" stroke-width="2"%3E%3Crect x="3" y="3" width="18" height="18" rx="2"%3E%3C/rect%3E%3Ccircle cx="8.5" cy="8.5" r="1.5"%3E%3C/circle%3E%3Cpolyline points="21 15 16 10 5 21"%3E%3C/polyline%3E%3C/svg%3E';
+                    img.src = 'image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 24 24" fill="none" stroke="%23ff6666" stroke-width="2"%3E%3Crect x="3" y="3" width="18" height="18" rx="2"%3E%3C/rect%3E%3Ccircle cx="8.5" cy="8.5" r="1.5"%3E%3C/circle%3E%3Cpolyline points="21 15 16 10 5 21"%3E%3C/polyline%3E%3C/svg%3E';
                     img.style.objectFit = 'contain';
                 };
                 
@@ -710,37 +768,35 @@
                 imageBox.appendChild(img);
                 slideDiv.appendChild(imageBox);
             } 
-            else {
-                // PDF rendering
+            else if (item.type === 'pdf-page') {
                 const pdfContainer = document.createElement('div');
                 pdfContainer.className = 'pdf-page-container';
-                pdfContainer.setAttribute('data-pdf-url', item.url);
-                pdfContainer.setAttribute('data-pdf-name', item.name);
                 
                 // Loading state
                 pdfContainer.innerHTML = `
                     <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 3rem; color: #888;">
                         <div class="spinner" style="width: 40px; height: 40px; margin-bottom: 1rem;"></div>
-                        <div>Loading PDF...</div>
+                        <div>Loading page ${item.pageNum}...</div>
                         <div style="font-size: 0.85rem; margin-top: 0.5rem;">${item.name}</div>
+                        <div style="font-size: 0.75rem; margin-top: 0.3rem;">Page ${item.pageNum} of ${item.totalPages}</div>
                     </div>
                 `;
                 
                 slideDiv.appendChild(pdfContainer);
                 
-                // Render first page when slide is visible
+                // Render page when slide is visible (with delay to avoid overwhelming)
                 setTimeout(() => {
-                    renderPDFPage(item.url, 1, pdfContainer);
-                }, 100 + (idx * 200)); // Stagger loading
+                    renderPDFPage(item.url, item.pageNum, pdfContainer);
+                }, 100 + (idx * 150));
             }
             
             trackElement.appendChild(slideDiv);
         });
         
-        updateDotsUI(items.length);
+        updateDotsUI(displayItems.length);
         updateSlideTransform(false);
         attachZoomForImages();
-        updateCounterBadge(items.length, currentIndex);
+        updateCounterBadge(displayItems.length, currentIndex);
         updateContactMessage();
     }
 
@@ -763,7 +819,15 @@
 
     function updateSlideTransform(withTransition = true) {
         if (!trackElement) return;
-        const total = (currentMode === "images") ? imageItems.length : pdfItems.length;
+        
+        let displayItems = allItems;
+        if (currentMode === "images") {
+            displayItems = allItems.filter(item => item.type === 'image');
+        } else if (currentMode === "pdfs") {
+            displayItems = allItems.filter(item => item.type === 'pdf-page');
+        }
+        
+        const total = displayItems.length;
         if (total === 0) return;
         
         const percent = -currentIndex * 100;
@@ -781,7 +845,14 @@
     }
 
     function goToSlide(newIndex, smooth = true) {
-        let maxLen = (currentMode === "images") ? imageItems.length : pdfItems.length;
+        let displayItems = allItems;
+        if (currentMode === "images") {
+            displayItems = allItems.filter(item => item.type === 'image');
+        } else if (currentMode === "pdfs") {
+            displayItems = allItems.filter(item => item.type === 'pdf-page');
+        }
+        
+        const maxLen = displayItems.length;
         if (maxLen === 0) return;
         
         if (newIndex < 0) newIndex = maxLen - 1;
@@ -800,12 +871,20 @@
 
     function updateContactMessage() {
         if (!discussBtn) return;
-        const items = (currentMode === "images") ? imageItems : pdfItems;
-        if (items.length === 0) return;
         
-        const currentFile = items[currentIndex]?.name || `item_${currentIndex+1}`;
-        const modeText = currentMode === "images" ? "design" : "PDF document";
-        const msg = `Hi WYRM.STUDIO! I'm interested in the ${modeText} "${currentFile}" (#${currentIndex+1}). Can we discuss?`;
+        let displayItems = allItems;
+        if (currentMode === "images") {
+            displayItems = allItems.filter(item => item.type === 'image');
+        } else if (currentMode === "pdfs") {
+            displayItems = allItems.filter(item => item.type === 'pdf-page');
+        }
+        
+        if (displayItems.length === 0) return;
+        
+        const currentItem = displayItems[currentIndex];
+        const modeText = currentItem.type === 'image' ? "design" : "PDF page";
+        const pageNum = currentItem.type === 'pdf-page' ? ` (page ${currentItem.pageNum}/${currentItem.totalPages})` : '';
+        const msg = `Hi WYRM.STUDIO! I'm interested in ${modeText} "${currentItem.name}"${pageNum} (#${currentIndex+1}). Can we discuss?`;
         discussBtn.href = `https://www.instagram.com/wyrm.studios/?text=${encodeURIComponent(msg)}`;
     }
 
@@ -932,16 +1011,19 @@
     }
 
     function setMode(mode) {
-        if (mode === currentMode) return;
         currentMode = mode;
         currentIndex = 0;
         
         if (mode === "images") {
             imagesModeBtn.classList.add('active');
             pdfsModeBtn.classList.remove('active');
-        } else {
+        } else if (mode === "pdfs") {
             pdfsModeBtn.classList.add('active');
             imagesModeBtn.classList.remove('active');
+        } else {
+            // "all" mode - show everything
+            imagesModeBtn.classList.remove('active');
+            pdfsModeBtn.classList.remove('active');
         }
         
         renderCurrentMode();
@@ -961,6 +1043,9 @@
                             <div style="font-size: 1.1rem; margin-bottom: 0.5rem;">🔍 Loading from GitHub...</div>
                             <div style="font-size: 0.85rem; color: #888;">
                                 ${REPO_CONFIG.owner}/${REPO_CONFIG.repo}/${REPO_CONFIG.folder}
+                            </div>
+                            <div style="font-size: 0.75rem; color: #666; margin-top: 0.5rem;">
+                                Processing images and PDF pages...
                             </div>
                         </div>
                     </div>
@@ -992,12 +1077,14 @@
         nextBtn.addEventListener('click', () => changeSlide(1));
         
         imagesModeBtn.addEventListener('click', () => { 
-            if (imageItems.length) setMode("images"); 
+            const hasImages = allItems.some(item => item.type === 'image');
+            if (hasImages) setMode("images"); 
             else alert(`No images found in /${REPO_CONFIG.folder} folder`); 
         });
         
         pdfsModeBtn.addEventListener('click', () => { 
-            if (pdfItems.length) setMode("pdfs"); 
+            const hasPDFs = allItems.some(item => item.type === 'pdf-page');
+            if (hasPDFs) setMode("pdfs"); 
             else alert(`No PDFs found in /${REPO_CONFIG.folder} folder`); 
         });
         
@@ -1009,7 +1096,7 @@
         log('🚀 WYRM STUDIO Client Vault initializing...', 'info');
         log(`📂 Repository: ${REPO_CONFIG.owner}/${REPO_CONFIG.repo}`, 'info');
         log(`📁 Folder: ${REPO_CONFIG.folder}`, 'info');
-        log(`📄 Using PDF.js for page-by-page rendering`, 'info');
+        log(`📄 Using PDF.js to render ALL pages`, 'info');
         
         loadAssets().then(() => {
             bindButtons();
