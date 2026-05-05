@@ -5,6 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Review Work - Gallery</title>
     <style>
+        * {<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WYRM.STUDIOS - Portfolio Gallery</title>
+    <style>
         * {
             margin: 0;
             padding: 0;
@@ -13,7 +20,610 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0d0d0d 100%);
+            min-height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .bg-shapes {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .shape {
+            position: absolute;
+            filter: blur(80px);
+            opacity: 0.15;
+            animation: float 20s infinite;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        }
+
+        .shape:nth-child(1) {
+            width: 500px;
+            height: 500px;
+            top: -150px;
+            left: -150px;
+        }
+
+        .shape:nth-child(2) {
+            width: 400px;
+            height: 400px;
+            bottom: -100px;
+            right: -100px;
+            animation-delay: -5s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -50px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        /* Premium Header */
+        .header {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 25px 50px;
+            margin-bottom: 30px;
+            text-align: center;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+        }
+
+        .brand-name {
+            color: #ffffff;
+            font-size: 2.2rem;
+            font-weight: 800;
+            letter-spacing: 4px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .header p {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+            letter-spacing: 2px;
+        }
+
+        /* Premium Gallery Container */
+        .gallery-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 750px;
+            height: 75vh;
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+        }
+
+        .gallery {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            transition: transform 0.5s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+
+        .slide {
+            min-width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+            user-select: none;
+        }
+
+        .image-container {
+            position: relative;
+            width: 95%;
+            height: 88%;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            filter: grayscale(100%) contrast(1.05);
+            transition: transform 0.3s ease;
+        }
+
+        .image-number {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 8px 18px;
+            border-radius: 25px;
+            font-weight: 700;
+            font-size: 1rem;
+            letter-spacing: 2px;
+            z-index: 10;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .slide-info {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            z-index: 5;
+        }
+
+        .slide-info h3 {
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+        }
+
+        .dots {
+            display: flex;
+            gap: 12px;
+            margin-top: 25px;
+            justify-content: center;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .dot.active {
+            background: white;
+            transform: scale(1.3);
+            box-shadow: 0 0 15px rgba(255,255,255,0.4);
+        }
+
+        .dot:hover {
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        /* Instagram Button - Premium */
+        .instagram-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: linear-gradient(135deg, #ffffff 0%, #e0e0e0 100%);
+            color: #000000;
+            padding: 16px 28px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 20px rgba(255, 255, 255, 0.15);
+            transition: all 0.3s ease;
+            z-index: 100;
+            font-size: 0.95rem;
+            letter-spacing: 1px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .instagram-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(255, 255, 255, 0.25);
+        }
+
+        .instagram-btn svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .swipe-hint {
+            position: absolute;
+            bottom: 45px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            animation: swipe 2s infinite;
+            z-index: 2;
+            letter-spacing: 1px;
+        }
+
+        @keyframes swipe {
+            0%, 100% { transform: translateX(-50%) translateX(0); }
+            50% { transform: translateX(-50%) translateX(-10px); }
+        }
+
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 1.2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .nav-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 10;
+            font-size: 1.5rem;
+        }
+
+        .nav-arrow:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .nav-arrow.prev { left: 10px; }
+        .nav-arrow.next { right: 10px; }
+
+        /* Credit Text - Left Side */
+        .credit-text {
+            position: fixed;
+            left: 25px;
+            bottom: 30px;
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 0.75rem;
+            letter-spacing: 1px;
+            z-index: 100;
+            text-align: left;
+        }
+
+        .credit-text strong {
+            color: rgba(255, 255, 255, 0.6);
+            display: block;
+            margin-bottom: 4px;
+            font-size: 0.8rem;
+        }
+
+        .image-container.zoomed img {
+            object-fit: cover;
+            transform: scale(1.5);
+            cursor: zoom-out;
+        }
+
+        @media (max-width: 768px) {
+            .brand-name { font-size: 1.6rem; }
+            .header { padding: 20px 30px; margin-bottom: 20px; }
+            
+            .gallery-wrapper {
+                height: 70vh;
+                border-radius: 18px;
+                max-width: 100%;
+            }
+            
+            .image-container {
+                height: 90%;
+                border-radius: 12px;
+            }
+            
+            .instagram-btn {
+                bottom: 20px;
+                right: 20px;
+                padding: 12px 20px;
+                font-size: 0.85rem;
+            }
+            
+            .credit-text {
+                left: 15px;
+                bottom: 20px;
+                font-size: 0.65rem;
+            }
+            
+            .nav-arrow {
+                width: 42px;
+                height: 42px;
+                font-size: 1.3rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container { padding: 10px; }
+            .header { margin-bottom: 15px; padding: 15px 20px; }
+            .gallery-wrapper { height: 65vh; }
+            .image-container { height: 92%; }
+            .brand-name { font-size: 1.4rem; letter-spacing: 3px; }
+        }
+
+        .error {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-shapes">
+        <div class="shape"></div>
+        <div class="shape"></div>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <div class="brand-name">WYRM.STUDIOS</div>
+            <p>Premium Design Portfolio</p>
+        </div>
+
+        <div class="gallery-wrapper" id="galleryWrapper">
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <span>Loading portfolio...</span>
+            </div>
+            <div class="gallery" id="gallery"></div>
+            
+            <button class="nav-arrow prev" onclick="changeSlide(-1)">‹</button>
+            <button class="nav-arrow next" onclick="changeSlide(1)">›</button>
+            
+            <div class="swipe-hint">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+                Swipe or double-tap to zoom
+            </div>
+        </div>
+
+        <div class="dots" id="dots"></div>
+    </div>
+
+    <!-- Credit Text - Left Side -->
+    <div class="credit-text">
+        <strong>WYRM.STUDIOS</strong>
+        This website crafted by<br>
+        WYRM Studio © 2026
+    </div>
+
+    <!-- Instagram Button -->
+    <a href="https://www.instagram.com/wyrm.studios/" class="instagram-btn" target="_blank" id="instaBtn" style="display: none;">
+        <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+        </svg>
+        Send Feedback
+    </a>
+
+    <script>
+        const config = {
+            githubUsername: 'wyrm-studios',
+            githubRepo: 'review.work',
+            folderPath: 'work',
+            instagramUsername: 'wyrm.studios',
+            fileExtensions: ['jpg', 'jpeg', 'png', 'gif', 'webp']
+        };
+
+        let images = [];
+        let currentIndex = 0;
+        let startX = 0;
+        let currentX = 0;
+        let isDragging = false;
+
+        async function init() {
+            try {
+                await loadImagesFromGitHub();
+                if (images.length > 0) {
+                    renderGallery();
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('instaBtn').style.display = 'flex';
+                    updateInstagramLink();
+                } else {
+                    showError('No images found in the repository');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showError('Failed to load images. Check repo settings.');
+            }
+        }
+
+        async function loadImagesFromGitHub() {
+            const apiUrl = `https://api.github.com/repos/${config.githubUsername}/${config.githubRepo}/contents/${config.folderPath}`;
+            const response = await fetch(apiUrl);
+            if (!response.ok) throw new Error('Failed to fetch from GitHub');
+            const data = await response.json();
+            
+            images = data
+                .filter(file => {
+                    const ext = file.name.split('.').pop().toLowerCase();
+                    return config.fileExtensions.includes(ext);
+                })
+                .sort((a, b) => a.name.localeCompare(b.name, undefined, {numeric: true}));
+        }
+
+        function renderGallery() {
+            const gallery = document.getElementById('gallery');
+            const dotsContainer = document.getElementById('dots');
+            
+            gallery.innerHTML = '';
+            dotsContainer.innerHTML = '';
+            
+            images.forEach((image, index) => {
+                const slide = document.createElement('div');
+                slide.className = 'slide';
+                slide.innerHTML = `
+                    <div class="image-container" data-index="${index}">
+                        <span class="image-number">#${String(index + 1).padStart(2, '0')}</span>
+                        <img src="${image.download_url}" alt="${image.name}" loading="${index === 0 ? 'eager' : 'lazy'}">
+                    </div>
+                `;
+                gallery.appendChild(slide);
+                
+                const dot = document.createElement('div');
+                dot.className = `dot ${index === 0 ? 'active' : ''}`;
+                dot.onclick = () => goToSlide(index);
+                dotsContainer.appendChild(dot);
+            });
+            
+            updateGalleryPosition();
+            setupDoubleTapZoom();
+        }
+
+        function updateGalleryPosition() {
+            const gallery = document.getElementById('gallery');
+            gallery.style.transform = `translateX(-${currentIndex * 100}%)`;
+            
+            document.querySelectorAll('.dot').forEach((dot, index) => {
+                dot.classList.toggle('active', index === currentIndex);
+            });
+        }
+
+        function changeSlide(direction) {
+            currentIndex += direction;
+            if (currentIndex < 0) currentIndex = images.length - 1;
+            if (currentIndex >= images.length) currentIndex = 0;
+            updateGalleryPosition();
+            setTimeout(updateInstagramLink, 100);
+        }
+
+        function goToSlide(index) {
+            currentIndex = index;
+            updateGalleryPosition();
+            setTimeout(updateInstagramLink, 100);
+        }
+
+        function updateInstagramLink() {
+            const currentNumber = String(currentIndex + 1).padStart(2, '0');
+            const btn = document.getElementById('instaBtn');
+            const message = `Hi! I'm interested in design #${currentNumber}. Can we discuss?`;
+            btn.href = `https://www.instagram.com/wyrm.studios/?text=${encodeURIComponent(message)}`;
+        }
+
+        function showError(message) {
+            const loading = document.getElementById('loading');
+            loading.innerHTML = `<div class="error"><p>⚠️ ${message}</p></div>`;
+        }
+
+        function setupDoubleTapZoom() {
+            let lastTap = 0;
+            document.querySelectorAll('.image-container').forEach(container => {
+                container.addEventListener('click', (e) => {
+                    const currentTime = new Date().getTime();
+                    const tapLength = currentTime - lastTap;
+                    if (tapLength < 300 && tapLength > 0) {
+                        container.classList.toggle('zoomed');
+                        e.preventDefault();
+                    }
+                    lastTap = currentTime;
+                });
+            });
+        }
+
+        const galleryWrapper = document.getElementById('galleryWrapper');
+
+        galleryWrapper.addEventListener('touchstart', handleStart, {passive: false});
+        galleryWrapper.addEventListener('touchmove', handleMove, {passive: false});
+        galleryWrapper.addEventListener('touchend', handleEnd, false);
+        galleryWrapper.addEventListener('mousedown', handleStart, false);
+        galleryWrapper.addEventListener('mousemove', handleMove, false);
+        galleryWrapper.addEventListener('mouseup', handleEnd, false);
+        galleryWrapper.addEventListener('mouseleave', handleEnd, false);
+
+        function handleStart(e) {
+            if (e.target.closest('.image-container.zoomed')) return;
+            isDragging = true;
+            startX = e.type.includes('mouse') ? e.pageX : e.touches[0].pageX;
+            galleryWrapper.style.cursor = 'grabbing';
+        }
+
+        function handleMove(e) {
+            if (!isDragging) return;
+            e.preventDefault();
+            currentX = e.type.includes('mouse') ? e.pageX : e.touches[0].pageX;
+            const diff = currentX - startX;
+            const gallery = document.getElementById('gallery');
+            const offset = -(currentIndex * 100) + (diff / galleryWrapper.offsetWidth * 100);
+            gallery.style.transform = `translateX(${offset}%)`;
+        }
+
+        function handleEnd(e) {
+            if (!isDragging) return;
+            isDragging = false;
+            galleryWrapper.style.cursor = 'grab';
+            
+            const diff = currentX - startX;
+            const threshold = 50;
+            
+            if (Math.abs(diff) > threshold) {
+                if (diff > 0) changeSlide(-1);
+                else changeSlide(1);
+            } else {
+                updateGalleryPosition();
+            }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') changeSlide(-1);
+            if (e.key === 'ArrowRight') changeSlide(1);
+        });
+
+        init();
+    </script>
+</body>
+</html>0%, #764ba2 100%);
             min-height: 100vh;
             overflow: hidden;
             position: relative;
