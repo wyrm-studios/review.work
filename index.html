@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
-    <title>WYRM STUDIO · Client Vault</title>
+    <title>WYRM STUDIO · Client Vault (Images + PDFs)</title>
     <style>
         * {
             margin: 0;
@@ -19,52 +19,76 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: center;
         }
 
-        /* MAIN CONTAINER — PURE FOCUS ON THE IMAGE */
+        /* MAIN VAULT */
         .vault {
             width: 100%;
             max-width: 1600px;
             margin: 0 auto;
             padding: 1rem;
+            flex: 1;
             display: flex;
             flex-direction: column;
-            min-height: 100vh;
-            justify-content: center;
         }
 
-        /* subtle studio mark (non intrusive) */
-        .studio-sign {
+        /* header / studio identity */
+        .studio-header {
             text-align: center;
-            margin-bottom: 1.2rem;
-            margin-top: 0.5rem;
+            margin-bottom: 1rem;
         }
-        .studio-sign .brand {
-            font-weight: 500;
+        .brand {
+            font-weight: 600;
             letter-spacing: 3px;
-            font-size: 0.85rem;
-            color: rgba(255,255,245,0.55);
-            background: rgba(10,10,15,0.4);
+            font-size: 0.9rem;
+            background: rgba(255,255,245,0.08);
             display: inline-block;
-            padding: 0.3rem 1.4rem;
+            padding: 0.3rem 1.8rem;
             border-radius: 60px;
             backdrop-filter: blur(8px);
+            color: #ddd9ff;
         }
-        .studio-sign .brand strong {
-            color: #ffffff;
-            font-weight: 600;
+        .brand strong {
+            color: white;
+            font-weight: 700;
         }
 
-        /* GALLERY CORE — BIG, RESPONSIVE, FOCUSED */
+        /* SWITCHER — toggle between Images and PDFs */
+        .mode-switch {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin: 1rem 0 1.5rem 0;
+        }
+        .mode-btn {
+            background: rgba(20,20,32,0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.15);
+            padding: 0.7rem 1.8rem;
+            border-radius: 60px;
+            font-weight: 600;
+            font-size: 1rem;
+            color: #e2e0ff;
+            cursor: pointer;
+            transition: all 0.2s;
+            letter-spacing: 0.5px;
+        }
+        .mode-btn.active {
+            background: white;
+            color: #0a0a12;
+            border-color: white;
+            box-shadow: 0 4px 14px rgba(255,255,255,0.2);
+        }
+        .mode-btn:active { transform: scale(0.97); }
+
+        /* GALLERY CORE (shared wrapper) */
         .gallery-core {
             width: 100%;
             background: #030303;
             border-radius: 32px;
             overflow: hidden;
-            box-shadow: 0 25px 45px -12px rgba(0,0,0,0.8);
             border: 1px solid rgba(255,255,255,0.06);
+            box-shadow: 0 25px 45px -12px black;
         }
 
         .viewport {
@@ -72,25 +96,6 @@
             width: 100%;
             background: #000000;
             touch-action: pan-y pinch-zoom;
-        }
-
-        /* DYNAMIC ASPECT: RATIO RESPECTS BOTH PC AND PHONE — LARGE IMAGE ZONE */
-        .image-stage {
-            position: relative;
-            width: 100%;
-            padding-bottom: 75%; /* 4:3 fallback, but we override with JS? No: we use min-height, but better: flex container for images */
-            background: #000;
-        }
-
-        /* better: use flex to adapt to image natural size while keeping control */
-        .image-stage {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #000000;
-            min-height: 55vh;
-            height: auto;
-            overflow: hidden;
         }
 
         .slide-track {
@@ -107,9 +112,10 @@
             justify-content: center;
             background: #000000;
             padding: 1.2rem;
+            min-height: 55vh;
         }
 
-        /* THE IMAGE CONTAINER — PERFECT SIZE FOR PHONE AND PC */
+        /* IMAGE display — big, perfect size */
         .image-box {
             width: 100%;
             display: flex;
@@ -118,9 +124,7 @@
             background: #000;
             border-radius: 24px;
             overflow: hidden;
-            box-shadow: 0 8px 28px rgba(0,0,0,0.6);
         }
-
         .image-box img {
             max-width: 100%;
             max-height: 70vh;
@@ -128,38 +132,52 @@
             height: auto;
             object-fit: contain;
             display: block;
-            margin: 0 auto;
-            transition: transform 0.2s ease;
             cursor: zoom-in;
+            transition: transform 0.2s ease;
             border-radius: 20px;
         }
-
-        /* zoom mode - easy for client to inspect details */
         .image-box.zoomed img {
             cursor: zoom-out;
             transform: scale(1.6);
         }
 
-        /* counter badge minimal */
-        .counter-badge {
-            position: absolute;
-            bottom: 1.5rem;
-            left: 1.8rem;
-            background: rgba(0,0,0,0.65);
-            backdrop-filter: blur(10px);
-            padding: 0.4rem 1rem;
+        /* PDF display — embedded viewer / full interactive */
+        .pdf-container {
+            width: 100%;
+            height: 70vh;
+            background: #1a1a24;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+        }
+        .pdf-viewer {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: white;
+        }
+        .pdf-fallback {
+            background: #0f0f17;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 1rem;
+            height: 100%;
+            text-align: center;
+            color: #bbb;
+        }
+        .pdf-fallback a {
+            color: white;
+            background: #2c2c44;
+            padding: 0.8rem 1.5rem;
             border-radius: 40px;
-            font-size: 0.8rem;
-            font-weight: 500;
-            color: #eee;
-            letter-spacing: 0.5px;
-            border: 0.5px solid rgba(255,255,255,0.2);
-            z-index: 12;
-            pointer-events: none;
-            font-family: monospace;
+            text-decoration: none;
         }
 
-        /* navigation buttons — big enough for fat fingers */
+        /* navigation buttons + counter */
         .nav-arrow {
             position: absolute;
             top: 50%;
@@ -174,22 +192,32 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            transition: all 0.2s;
             z-index: 20;
             color: white;
             font-size: 2rem;
             font-weight: 300;
-            box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+            transition: 0.2s;
         }
-        .nav-arrow:hover {
-            background: rgba(110, 90, 200, 0.9);
-            transform: translateY(-50%) scale(1.03);
-            border-color: rgba(255,255,255,0.5);
-        }
+        .nav-arrow:hover { background: rgba(110, 90, 200, 0.9); transform: translateY(-50%) scale(1.02); }
         .prev-btn { left: 12px; }
         .next-btn { right: 12px; }
 
-        /* dots (subtle but helpful) */
+        .counter-badge {
+            position: absolute;
+            bottom: 1.2rem;
+            left: 1.5rem;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(10px);
+            padding: 0.4rem 1rem;
+            border-radius: 40px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #eee;
+            z-index: 12;
+            pointer-events: none;
+            font-family: monospace;
+        }
+
         .dots-panel {
             display: flex;
             justify-content: center;
@@ -202,56 +230,49 @@
             height: 8px;
             background: rgba(200,200,220,0.35);
             border-radius: 20px;
-            transition: all 0.25s;
+            transition: 0.25s;
             cursor: pointer;
         }
         .dot-nav.active {
             width: 32px;
             background: white;
-            box-shadow: 0 0 6px rgba(255,255,210,0.6);
+            box-shadow: 0 0 6px #fff8;
         }
 
-        /* critical statement: "this website is only to deliver work" — clear and professional */
+        /* delivery statement */
         .delivery-statement {
             text-align: center;
-            margin-top: 1.5rem;
-            margin-bottom: 0.75rem;
+            margin-top: 1.2rem;
             background: rgba(10,10,15,0.5);
             backdrop-filter: blur(12px);
-            padding: 0.9rem 1.2rem;
+            padding: 0.8rem 1.2rem;
             border-radius: 60px;
             width: fit-content;
-            max-width: 90%;
+            max-width: 95%;
             align-self: center;
             border: 0.5px solid rgba(255,255,240,0.1);
         }
         .delivery-statement p {
             font-size: 0.85rem;
-            letter-spacing: 0.3px;
             color: #cdcdff;
-            font-weight: 400;
         }
         .delivery-statement strong {
             color: white;
-            font-weight: 600;
-            background: rgba(255,255,255,0.05);
+            background: rgba(255,255,255,0.08);
             padding: 2px 8px;
             border-radius: 30px;
-            display: inline-block;
         }
 
-        /* client action (subtle but accessible) */
         .client-contact {
             display: flex;
             justify-content: center;
             gap: 1rem;
-            margin-top: 0.8rem;
-            margin-bottom: 0.5rem;
+            margin: 0.8rem 0 0.5rem;
         }
         .contact-btn {
             background: rgba(20,20,32,0.8);
             backdrop-filter: blur(8px);
-            padding: 10px 20px;
+            padding: 8px 20px;
             border-radius: 40px;
             text-decoration: none;
             color: #f0efff;
@@ -263,86 +284,68 @@
             border: 0.5px solid rgba(255,255,255,0.2);
             transition: 0.2s;
         }
-        .contact-btn:hover {
-            background: white;
-            color: black;
-            border-color: white;
-        }
+        .contact-btn:hover { background: white; color: black; }
+
         .watermark-footer {
             text-align: center;
             font-size: 0.7rem;
             color: rgba(255,255,255,0.25);
-            margin: 1rem 0 0.5rem;
+            margin: 0.8rem 0 0.3rem;
         }
 
-        /* responsive: phones make image huge */
         @media (max-width: 680px) {
-            .vault { padding: 0.6rem; }
+            .vault { padding: 0.7rem; }
             .slide { padding: 0.8rem; }
-            .image-box img {
-                max-height: 68vh;
-                border-radius: 18px;
-            }
-            .nav-arrow {
-                width: 44px;
-                height: 44px;
-                font-size: 1.7rem;
-            }
+            .image-box img { max-height: 60vh; }
+            .pdf-container { height: 55vh; }
+            .nav-arrow { width: 42px; height: 42px; font-size: 1.6rem; }
             .prev-btn { left: 6px; }
             .next-btn { right: 6px; }
-            .counter-badge { bottom: 1rem; left: 1rem; font-size: 0.7rem; padding: 0.25rem 0.8rem; }
-            .delivery-statement p { font-size: 0.7rem; }
+            .mode-btn { padding: 0.5rem 1.2rem; font-size: 0.85rem; }
+            .counter-badge { bottom: 0.8rem; left: 1rem; font-size: 0.7rem; }
         }
-
-        /* large screens, image bigger but comfortable */
         @media (min-width: 1200px) {
-            .image-box img {
-                max-height: 80vh;
-                max-width: 90vw;
-            }
-            .slide { padding: 1.8rem; }
+            .image-box img { max-height: 78vh; }
+            .pdf-container { height: 75vh; }
         }
 
         .loading-state {
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            padding: 3rem;
             gap: 1rem;
-            background: #050505;
-            min-height: 50vh;
-            border-radius: 32px;
+            padding: 2rem;
         }
         .spinner {
-            width: 48px;
-            height: 48px;
-            border: 3px solid rgba(255,255,255,0.1);
-            border-top: 3px solid #ffffff;
+            width: 44px;
+            height: 44px;
+            border: 3px solid rgba(255,255,255,0.2);
+            border-top: 3px solid white;
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
         }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes spin { to { transform: rotate(360deg); } }
         .error-box {
-            background: rgba(255,80,80,0.1);
+            background: rgba(255,80,80,0.12);
             border-left: 3px solid #ff9f7a;
             padding: 1rem;
             border-radius: 20px;
-            text-align: center;
             color: #ffcfc0;
-        }
-        button {
-            background: none;
-            border: none;
-            cursor: pointer;
+            text-align: center;
         }
     </style>
 </head>
 <body>
 
 <div class="vault">
-    <div class="studio-sign">
-        <div class="brand"><strong>WYRM STUDIO</strong> · private client delivery</div>
+    <div class="studio-header">
+        <div class="brand"><strong>WYRM STUDIO</strong> · confidential client delivery</div>
+    </div>
+
+    <!-- SWITCHER: Images vs PDFs -->
+    <div class="mode-switch">
+        <button class="mode-btn" id="imagesModeBtn">🖼️ VISUAL WORK</button>
+        <button class="mode-btn" id="pdfsModeBtn">📄 DOCUMENTS / PDFs</button>
     </div>
 
     <div class="gallery-core">
@@ -354,126 +357,136 @@
         <div class="dots-panel" id="dotsPanel"></div>
     </div>
 
-    <!-- CLEAR STATEMENT: this website is only made for showing client work -->
     <div class="delivery-statement">
-        <p>✦ <strong>THIS WEBSITE IS EXCLUSIVELY BUILT TO DELIVER YOUR WORK</strong> ✦<br>
-        Every image appears LARGE & CRYSTAL CLEAR — optimized for both desktop and mobile. No distractions, only your final designs.</p>
+        <p>✦ <strong>THIS WEBSITE IS MADE TO DELIVER YOUR WORK — IMAGES + PDFs</strong> ✦<br>
+        Switch between pages: see full-resolution designs & documents. Perfect on phone and PC.</p>
     </div>
 
     <div class="client-contact">
-        <a href="#" id="discussBtn" class="contact-btn" target="_blank">
-            <span>💬</span> Discuss this project
-        </a>
-        <a href="https://www.instagram.com/wyrm.studios/" class="contact-btn" target="_blank">
-            📸 @wyrm.studios
-        </a>
+        <a href="#" id="discussBtn" class="contact-btn" target="_blank"><span>💬</span> Discuss this work</a>
+        <a href="https://www.instagram.com/wyrm.studios/" class="contact-btn" target="_blank">📸 @wyrm.studios</a>
     </div>
-    <div class="watermark-footer">
-        WYRM.STUDIO — crafted for client presentation
-    </div>
+    <div class="watermark-footer">WYRM.STUDIO — client exclusive preview</div>
 </div>
 
 <script>
-    // --------------------------------------------------------------
-    // CONFIGURATION: reads directly from GitHub folder 'work'
-    // --------------------------------------------------------------
-    const GITHUB_CONFIG = {
+    // ======================= CONFIG ==========================
+    const REPO_CONFIG = {
         owner: "wyrm-studios",
         repo: "review.work",
-        path: "work",
-        extensions: ["jpg", "jpeg", "png", "webp", "gif", "avif"]
+        folder: "work",
+        imageExts: ["jpg", "jpeg", "png", "webp", "gif", "avif"],
+        pdfExt: "pdf"
     };
 
-    let galleryImages = [];       // array of { name, url, raw }
+    // Data states
+    let imageItems = [];     // { name, url }
+    let pdfItems = [];
+    let currentMode = "images";   // "images" or "pdfs"
     let currentIndex = 0;
-    let trackElement = document.getElementById('slideTrack');
-    let dotsPanel = document.getElementById('dotsPanel');
-    let viewportElement = document.getElementById('viewportGallery');
     let activeZoomContainer = null;
     let isDragging = false;
     let dragStartX = 0;
     let dragDelta = 0;
+    
+    // DOM elements
+    const trackElement = document.getElementById('slideTrack');
+    const dotsPanel = document.getElementById('dotsPanel');
+    const viewport = document.getElementById('viewportGallery');
+    const imagesModeBtn = document.getElementById('imagesModeBtn');
+    const pdfsModeBtn = document.getElementById('pdfsModeBtn');
+    const prevBtn = document.getElementById('prevSlideBtn');
+    const nextBtn = document.getElementById('nextSlideBtn');
+    const discussBtn = document.getElementById('discussBtn');
 
-    // Helper: Fetch images from GitHub repo
-    async function fetchWorkFromGitHub() {
-        const apiUrl = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}`;
+    // 1) FETCH from GitHub and separate images + PDFs
+    async function fetchAllAssets() {
+        const apiUrl = `https://api.github.com/repos/${REPO_CONFIG.owner}/${REPO_CONFIG.repo}/contents/${REPO_CONFIG.folder}`;
         const response = await fetch(apiUrl);
         if (!response.ok) {
-            if (response.status === 404) throw new Error("Repository /work folder not found. Expected: wyrm-studios/review.work/work");
-            throw new Error(`GitHub error (${response.status})`);
+            throw new Error(`GitHub error (${response.status}). Ensure repo: wyrm-studios/review.work/work exists`);
         }
         const files = await response.json();
-        if (!Array.isArray(files)) throw new Error("Invalid response from GitHub");
+        if (!Array.isArray(files)) throw new Error("Invalid GitHub response");
 
-        const imageFiles = files.filter(file => {
-            if (file.type !== 'file') return false;
+        const images = [];
+        const pdfs = [];
+        for (const file of files) {
+            if (file.type !== 'file') continue;
             const ext = file.name.split('.').pop().toLowerCase();
-            return GITHUB_CONFIG.extensions.includes(ext);
-        }).sort((a,b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
-
-        if (imageFiles.length === 0) throw new Error("No images found inside /work folder. Please add .jpg, .png etc.");
-
-        return imageFiles.map(file => ({
-            name: file.name,
-            url: file.download_url,
-            displayName: file.name.replace(/\.[^/.]+$/, '')
-        }));
+            if (REPO_CONFIG.imageExts.includes(ext)) {
+                images.push({ name: file.name, url: file.download_url });
+            } else if (ext === REPO_CONFIG.pdfExt) {
+                pdfs.push({ name: file.name, url: file.download_url });
+            }
+        }
+        // sort alphanumerically
+        const sortFn = (a,b) => a.name.localeCompare(b.name, undefined, {numeric: true});
+        images.sort(sortFn);
+        pdfs.sort(sortFn);
+        return { images, pdfs };
     }
 
-    // Render the entire gallery with BIG image focus
-    function renderFullGallery() {
+    // 2) RENDER based on current mode
+    function renderCurrentMode() {
         if (!trackElement) return;
-        if (galleryImages.length === 0) {
-            trackElement.innerHTML = `<div class="slide" style="justify-content:center;"><div class="error-box">⚠️ No client work images found. Please upload to /work folder.</div></div>`;
+        const items = (currentMode === "images") ? imageItems : pdfItems;
+        if (items.length === 0) {
+            trackElement.innerHTML = `<div class="slide" style="justify-content:center;"><div class="error-box">📭 No ${currentMode === "images" ? "images" : "PDFs"} found in /work folder.<br>Add files to wyrm-studios/review.work/work</div></div>`;
+            if (dotsPanel) dotsPanel.innerHTML = '';
+            updateCounterBadge(0,0);
             return;
         }
-
+        
         trackElement.innerHTML = '';
-        galleryImages.forEach((img, idx) => {
+        items.forEach((item, idx) => {
             const slideDiv = document.createElement('div');
             slideDiv.className = 'slide';
-            const imageBox = document.createElement('div');
-            imageBox.className = 'image-box';
-            imageBox.setAttribute('data-idx', idx);
-            const imgElement = document.createElement('img');
-            imgElement.src = img.url;
-            imgElement.alt = `Client work ${idx+1}: ${img.name}`;
-            imgElement.loading = idx === 0 ? 'eager' : 'lazy';
-            imgElement.draggable = false;
-            imageBox.appendChild(imgElement);
-            slideDiv.appendChild(imageBox);
+            if (currentMode === "images") {
+                const imageBox = document.createElement('div');
+                imageBox.className = 'image-box';
+                imageBox.setAttribute('data-idx', idx);
+                const img = document.createElement('img');
+                img.src = item.url;
+                img.alt = `Client work ${idx+1}: ${item.name}`;
+                img.loading = idx === 0 ? 'eager' : 'lazy';
+                img.draggable = false;
+                imageBox.appendChild(img);
+                slideDiv.appendChild(imageBox);
+            } 
+            else {  // PDF mode
+                const pdfContainer = document.createElement('div');
+                pdfContainer.className = 'pdf-container';
+                // Use embed for best preview (mobile friendly)
+                const viewer = document.createElement('iframe');
+                viewer.className = 'pdf-viewer';
+                viewer.src = item.url;
+                viewer.title = `PDF: ${item.name}`;
+                viewer.setAttribute('allow', 'fullscreen');
+                // Fallback iframe fails gracefully
+                pdfContainer.appendChild(viewer);
+                // Small label under PDF (optional)
+                const pdfLabel = document.createElement('div');
+                pdfLabel.style.cssText = 'background:#0a0a12; text-align:center; padding:6px; font-size:0.7rem; color:#aaa; border-top:1px solid #222;';
+                pdfLabel.innerText = `📄 ${item.name}`;
+                pdfContainer.appendChild(pdfLabel);
+                slideDiv.appendChild(pdfContainer);
+            }
             trackElement.appendChild(slideDiv);
         });
-
-        // add global counter badge (absolute positioned inside viewport)
-        updateCounterBadge();
-        updateDotsUI();
+        
+        updateDotsUI(items.length);
         updateSlideTransform(false);
-        attachZoomListeners();
+        attachZoomForImages(); // only relevant for image mode
+        updateCounterBadge(items.length, currentIndex);
+        updateContactMessage();
     }
 
-    function updateCounterBadge() {
-        let existingBadge = document.querySelector('.counter-badge-global');
-        if (!existingBadge) {
-            const badge = document.createElement('div');
-            badge.className = 'counter-badge counter-badge-global';
-            const viewport = document.getElementById('viewportGallery');
-            if (viewport) viewport.style.position = 'relative';
-            viewport?.appendChild(badge);
-            existingBadge = badge;
-        }
-        if (galleryImages.length) {
-            existingBadge.textContent = `${String(currentIndex+1).padStart(2,'0')} / ${String(galleryImages.length).padStart(2,'0')}`;
-        } else {
-            existingBadge.textContent = `0 / 0`;
-        }
-    }
-
-    function updateDotsUI() {
+    function updateDotsUI(totalItems) {
         if (!dotsPanel) return;
         dotsPanel.innerHTML = '';
-        if (galleryImages.length === 0) return;
-        for (let i = 0; i < galleryImages.length; i++) {
+        if (totalItems === 0) return;
+        for (let i = 0; i < totalItems; i++) {
             const dot = document.createElement('div');
             dot.classList.add('dot-nav');
             if (i === currentIndex) dot.classList.add('active');
@@ -487,28 +500,31 @@
 
     function updateSlideTransform(withTransition = true) {
         if (!trackElement) return;
+        const total = (currentMode === "images") ? imageItems.length : pdfItems.length;
+        if (total === 0) return;
         const percent = -currentIndex * 100;
         trackElement.style.transition = withTransition ? 'transform 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1)' : 'none';
         trackElement.style.transform = `translateX(${percent}%)`;
         
-        // update dots active state
+        // update dots active
         const allDots = document.querySelectorAll('.dot-nav');
         allDots.forEach((dot, idx) => {
             if (idx === currentIndex) dot.classList.add('active');
             else dot.classList.remove('active');
         });
-        updateCounterBadge();
-        updateContactMessage();
-        // reset any zoom effect when slide changes (clean)
-        resetAllZooms();
+        updateCounterBadge(total, currentIndex);
+        if (currentMode === "images") resetAllZooms();
     }
 
-    function goToSlide(index, smooth = true) {
-        if (galleryImages.length === 0) return;
-        if (index < 0) index = galleryImages.length - 1;
-        if (index >= galleryImages.length) index = 0;
-        currentIndex = index;
+    function goToSlide(newIndex, smooth = true) {
+        let maxLen = (currentMode === "images") ? imageItems.length : pdfItems.length;
+        if (maxLen === 0) return;
+        if (newIndex < 0) newIndex = maxLen - 1;
+        if (newIndex >= maxLen) newIndex = 0;
+        currentIndex = newIndex;
         updateSlideTransform(smooth);
+        updateContactMessage();
+        if (currentMode === "images") resetAllZooms();
     }
 
     function changeSlide(delta) {
@@ -516,39 +532,48 @@
     }
 
     function updateContactMessage() {
-        const discussBtn = document.getElementById('discussBtn');
-        if (!discussBtn || !galleryImages.length) return;
-        const currentNumber = String(currentIndex + 1).padStart(2,'0');
-        const projectLabel = galleryImages[currentIndex]?.name || `Design ${currentNumber}`;
-        const igMessage = `Hi WYRM.STUDIO! I'm interested in the work #${currentNumber} (${projectLabel}). Can we talk about next steps?`;
-        const instaUrl = `https://www.instagram.com/wyrm.studios/?text=${encodeURIComponent(igMessage)}`;
-        discussBtn.href = instaUrl;
+        if (!discussBtn) return;
+        const items = (currentMode === "images") ? imageItems : pdfItems;
+        if (items.length === 0) return;
+        const currentFile = items[currentIndex]?.name || `item_${currentIndex+1}`;
+        const modeText = currentMode === "images" ? "design" : "PDF document";
+        const msg = `Hi WYRM.STUDIO! I'm interested in the ${modeText} "${currentFile}" (#${currentIndex+1}). Can we discuss?`;
+        discussBtn.href = `https://www.instagram.com/wyrm.studios/?text=${encodeURIComponent(msg)}`;
     }
 
-    // ZOOM function: double-click/tap on image to see details BIG
-    function attachZoomListeners() {
+    function updateCounterBadge(total, idx) {
+        let badge = document.querySelector('.counter-badge');
+        if (!badge) {
+            const newBadge = document.createElement('div');
+            newBadge.className = 'counter-badge';
+            viewport?.appendChild(newBadge);
+            badge = newBadge;
+        }
+        if (total > 0) {
+            badge.textContent = `${String(idx+1).padStart(2,'0')} / ${String(total).padStart(2,'0')}`;
+        } else {
+            badge.textContent = `0 / 0`;
+        }
+    }
+
+    // zoom logic (images only)
+    function attachZoomForImages() {
         const allImageBoxes = document.querySelectorAll('.image-box');
         allImageBoxes.forEach(box => {
-            // remove previous listener to avoid dup
-            box.removeEventListener('click', handleZoomEvent);
-            box.addEventListener('click', handleZoomEvent);
+            box.removeEventListener('click', handleImageZoom);
+            box.addEventListener('click', handleImageZoom);
         });
     }
 
-    function handleZoomEvent(e) {
-        e.stopPropagation();
+    function handleImageZoom(e) {
         const box = e.currentTarget;
         if (!box) return;
-        // if any other zoomed, reset first
         if (activeZoomContainer && activeZoomContainer !== box) {
             activeZoomContainer.classList.remove('zoomed');
         }
         box.classList.toggle('zoomed');
-        if (box.classList.contains('zoomed')) {
-            activeZoomContainer = box;
-        } else {
-            if (activeZoomContainer === box) activeZoomContainer = null;
-        }
+        if (box.classList.contains('zoomed')) activeZoomContainer = box;
+        else if (activeZoomContainer === box) activeZoomContainer = null;
     }
 
     function resetAllZooms() {
@@ -559,137 +584,129 @@
         document.querySelectorAll('.image-box').forEach(b => b.classList.remove('zoomed'));
     }
 
-    // swipe & mouse drag handling for smooth navigation (big images)
-    function initSwipeAndDrag() {
-        const container = document.getElementById('viewportGallery');
-        if (!container) return;
+    // SWIPE + DRAG (for both modes)
+    function initDragEvents() {
+        if (!viewport) return;
         let startPointer = 0;
         let isSwiping = false;
         let startTransformPercent = 0;
         
-        const onPointerStart = (e) => {
-            if (activeZoomContainer) return; // when zoomed, avoid swipe conflicts
+        const onStart = (e) => {
+            if (currentMode === "images" && activeZoomContainer) return; // avoid conflict while zoomed
             isSwiping = true;
             startPointer = (e.type === 'mousedown' ? e.pageX : e.touches[0].pageX);
-            const currentTransform = trackElement.style.transform;
-            const match = currentTransform.match(/translateX\(([-\d.]+)%/);
-            startTransformPercent = match ? parseFloat(match[1]) : -currentIndex * 100;
+            const transform = trackElement.style.transform;
+            const match = transform.match(/translateX\(([-\d.]+)%/);
+            startTransformPercent = match ? parseFloat(match[1]) : -(currentIndex * 100);
             trackElement.style.transition = 'none';
             e.preventDefault?.();
         };
-        
-        const onPointerMove = (e) => {
+        const onMove = (e) => {
             if (!isSwiping) return;
-            const currentX = (e.type === 'mousemove' ? e.pageX : e.touches[0].pageX);
-            const diffX = currentX - startPointer;
-            const viewportWidth = container.clientWidth;
-            const percentShift = (diffX / viewportWidth) * 100;
+            const curX = (e.type === 'mousemove' ? e.pageX : e.touches[0].pageX);
+            const diff = curX - startPointer;
+            const viewportW = viewport.clientWidth;
+            const percentShift = (diff / viewportW) * 100;
             let newShift = startTransformPercent + percentShift;
             trackElement.style.transform = `translateX(${newShift}%)`;
-            dragDelta = diffX;
+            dragDelta = diff;
         };
-        
-        const onPointerEnd = () => {
-            if (!isSwiping) {
-                trackElement.style.transition = '';
-                return;
-            }
+        const onEnd = () => {
+            if (!isSwiping) return;
             isSwiping = false;
-            const threshold = 40;
+            const threshold = 45;
             if (Math.abs(dragDelta) > threshold) {
-                if (dragDelta > 0) {
-                    changeSlide(-1);
-                } else {
-                    changeSlide(1);
-                }
+                if (dragDelta > 0) changeSlide(-1);
+                else changeSlide(1);
             } else {
                 updateSlideTransform(true);
             }
             dragDelta = 0;
             trackElement.style.transition = '';
         };
-        
-        container.addEventListener('mousedown', onPointerStart);
-        window.addEventListener('mousemove', onPointerMove);
-        window.addEventListener('mouseup', onPointerEnd);
-        container.addEventListener('touchstart', onPointerStart, { passive: false });
-        container.addEventListener('touchmove', onPointerMove, { passive: false });
-        container.addEventListener('touchend', onPointerEnd);
-        container.addEventListener('touchcancel', onPointerEnd);
-        container.addEventListener('dragstart', (e) => e.preventDefault());
+        viewport.addEventListener('mousedown', onStart);
+        window.addEventListener('mousemove', onMove);
+        window.addEventListener('mouseup', onEnd);
+        viewport.addEventListener('touchstart', onStart, { passive: false });
+        viewport.addEventListener('touchmove', onMove, { passive: false });
+        viewport.addEventListener('touchend', onEnd);
+        viewport.addEventListener('touchcancel', onEnd);
+        viewport.addEventListener('dragstart', (e) => e.preventDefault());
     }
 
-    // keyboard navigation left/right
-    function bindKeys() {
+    function bindKeyboard() {
         window.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowLeft') {
-                e.preventDefault();
-                changeSlide(-1);
-            } else if (e.key === 'ArrowRight') {
-                e.preventDefault();
-                changeSlide(1);
-            } else if (e.key === 'Escape') {
-                resetAllZooms();
-            }
+            if (e.key === 'ArrowLeft') { e.preventDefault(); changeSlide(-1); }
+            else if (e.key === 'ArrowRight') { e.preventDefault(); changeSlide(1); }
+            else if (e.key === 'Escape') resetAllZooms();
         });
     }
 
-    // loading & error handlers with clean UI
-    async function initApp() {
+    // Mode switching
+    function setMode(mode) {
+        if (mode === currentMode) return;
+        currentMode = mode;
+        currentIndex = 0;  // reset index when switching
+        // update active button style
+        if (mode === "images") {
+            imagesModeBtn.classList.add('active');
+            pdfsModeBtn.classList.remove('active');
+        } else {
+            pdfsModeBtn.classList.add('active');
+            imagesModeBtn.classList.remove('active');
+        }
+        renderCurrentMode();
+        updateContactMessage();
+        resetAllZooms();
+    }
+
+    async function bootstrap() {
         showLoading(true);
         try {
-            const images = await fetchWorkFromGitHub();
-            galleryImages = images;
-            renderFullGallery();
+            const { images, pdfs } = await fetchAllAssets();
+            imageItems = images;
+            pdfItems = pdfs;
+            if (imageItems.length === 0 && pdfItems.length === 0) {
+                throw new Error("No images or PDFs found in the /work folder.");
+            }
+            // default mode: images if available, else pdfs
+            if (imageItems.length > 0) setMode("images");
+            else if (pdfItems.length > 0) setMode("pdfs");
+            else throw new Error("No assets found");
             showLoading(false);
-            updateContactMessage();
-            // extra zoom binding after images fully load
-            setTimeout(() => {
-                attachZoomListeners();
-            }, 100);
         } catch (err) {
             console.error(err);
             showLoading(false, err.message);
         }
     }
 
-    function showLoading(loading, errorText = null) {
+    function showLoading(loading, errorMsg = null) {
         if (!trackElement) return;
         if (loading) {
-            trackElement.innerHTML = `<div class="slide" style="justify-content:center; min-height:50vh;"><div class="loading-state"><div class="spinner"></div><span style="color:#ccc">Loading your designs from secure vault...</span></div></div>`;
+            trackElement.innerHTML = `<div class="slide"><div class="loading-state"><div class="spinner"></div><span>Loading your secure gallery (images + PDFs)...</span></div></div>`;
             if (dotsPanel) dotsPanel.innerHTML = '';
-        } else if (errorText) {
-            trackElement.innerHTML = `<div class="slide" style="justify-content:center;"><div class="error-box"><strong>⚠️ ${errorText}</strong><br><span style="font-size:0.8rem;">Make sure your GitHub repo: wyrm-studios/review.work contains a /work folder with images.</span></div></div>`;
-            if (dotsPanel) dotsPanel.innerHTML = '';
+        } else if (errorMsg) {
+            trackElement.innerHTML = `<div class="slide"><div class="error-box"><strong>⚠️ ${errorMsg}</strong><br>Make sure your GitHub repo: wyrm-studios/review.work/work contains images (.jpg, .png) and/or PDFs.</div></div>`;
         }
     }
 
-    // after render, attach UI event handlers
-    function attachUIButtons() {
-        const prev = document.getElementById('prevSlideBtn');
-        const next = document.getElementById('nextSlideBtn');
-        if (prev) prev.addEventListener('click', () => changeSlide(-1));
-        if (next) next.addEventListener('click', () => changeSlide(1));
-        initSwipeAndDrag();
-        bindKeys();
+    // Event binding for UI
+    function bindButtons() {
+        prevBtn.addEventListener('click', () => changeSlide(-1));
+        nextBtn.addEventListener('click', () => changeSlide(1));
+        imagesModeBtn.addEventListener('click', () => { if (imageItems.length) setMode("images"); else alert("No images found in /work folder"); });
+        pdfsModeBtn.addEventListener('click', () => { if (pdfItems.length) setMode("pdfs"); else alert("No PDFs found in /work folder"); });
+        initDragEvents();
+        bindKeyboard();
     }
 
-    // resize handler to ensure images never overflow
-    window.addEventListener('resize', () => {
-        if (activeZoomContainer) resetAllZooms();
-        updateSlideTransform(false);
-    });
-
-    // BOOT
-    initApp().then(() => {
-        attachUIButtons();
-        // final statement: ensure big images look perfect on phones
-        const styleFix = document.createElement('style');
-        styleFix.textContent = `@media (max-width: 600px) { .image-box img { max-height: 65vh; } }`;
-        document.head.appendChild(styleFix);
-    }).catch(err => {
-        showLoading(false, err.message);
-    });
+    bootstrap().then(() => {
+        bindButtons();
+        // additional fix: ensure pdf iframe touch scroll not blocked
+        const style = document.createElement('style');
+        style.textContent = `.pdf-viewer { width: 100%; height: 100%; background: white; }`;
+        document.head.appendChild(style);
+    }).catch(e => showLoading(false, e.message));
 </script>
 </body>
 </html>
